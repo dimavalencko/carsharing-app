@@ -1,0 +1,3 @@
+CREATE DATABASE identity;
+CREATE USER nestuser WITH PASSWORD 'root';
+GRANT ALL PRIVILEGES ON DATABASE identity TO nestuser;
