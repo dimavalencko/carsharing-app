@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - IDENTITY_HOST=identity-service
+      - IDENTITY_PORT=3001
+    volumes:
+      - ./services/api-gateway:/app
+      - /app/node_modules
+    depends_on:
+      - identity
+    networks:
+      - carsharing-net
+    command: npm run start:dev
+
+  identity-service:
+    build:
+      context: ./services/identity
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3001:3001"
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - SERVICE_PORT=3001
+      - HTTP_PORT=3002
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=root
+      - DB_NAME=identity
+    volumes:
+      - ./services/identity-service:/app
+      - /app/node_modules
+    depends_on:
+      - postgres
+    networks:
+      - carsharing-net
+    command: npm run start:dev
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=identity
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - carsharing-net
+
+networks:
+  carsharing-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
