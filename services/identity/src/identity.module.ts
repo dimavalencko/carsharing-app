@@ -28,6 +28,8 @@ import { HealthService } from './health/health.service';
         retryAttempts: 5,
         retryDelay: 3000,
         autoLoadEntities: true,
+        migrations: configService.get('NODE_ENV') === 'production' ? ['dist/migrations/*.js'] : [],
+        migrationsRun: configService.get('NODE_ENV') === 'production',
       }),
       inject: [ConfigService],
     }),
