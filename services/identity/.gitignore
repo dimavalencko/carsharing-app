@@ -45,7 +45,7 @@ lerna-debug.log*
 # temp directory
 .temp
 .tmp
-.package-lock.json
+package-lock.json
 
 # Runtime data
 pids
