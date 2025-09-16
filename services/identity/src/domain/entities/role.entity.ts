@@ -1,20 +1,29 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { User } from './user.entity';
 import { UserRoles } from '../enums/user-roles';
 
-// Персональные данные пользователя
 @Entity('roles')
 export class Role {
   @PrimaryGeneratedColumn()
-  id: number;
+  private _id: number;
 
-  @Column({unique: true, type: 'enum', enum: UserRoles, default: UserRoles.USER})
-  name: UserRoles;
-  
-  // #region Relations
+  @Column({ unique: true, type: 'enum', enum: UserRoles, default: UserRoles.USER })
+  private _name: UserRoles;
 
+  // Relation - для TypeORM
   @OneToMany(() => User, user => user.role)
-  users: User[];
+  protected _users: User[];
 
-  // #endregion  
+  // Геттеры
+  public get id(): number { return this._id; }
+  public get name(): UserRoles { return this._name; }
+  public get users(): User[] { return this._users; }
+
+  // Сеттер с валидацией
+  public set name(name: UserRoles) {
+    if (!Object.values(UserRoles).includes(name)) {
+      throw new Error('Invalid role');
+    }
+    this._name = name;
+  }
 }
