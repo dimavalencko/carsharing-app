@@ -123,7 +123,7 @@ dist
 .tern-port
 
 # Stores VSCode versions used for testing VSCode extensions# VS Code
-.vscode/*
+.vscode/
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
