@@ -1,54 +1,135 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm'
-import { User } from './user.entity'
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
+import { User } from './user.entity';
 
-// Класс "Водительские права"
 @Entity()
 export class DriverLicense {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  private _id: string;
 
-  @Column({ name: 'license_number', unique: true, length: 50})
-  licenseNumber: string;
+  @Column({ name: 'license_number', type: 'varchar', unique: true, length: 50 })
+  private _licenseNumber: string;
 
-  @Column({ name: 'first_name', length: 50})
-  firstName: string;
+  @Column({ name: 'first_name', type: 'varchar', length: 50 })
+  private _firstName: string;
 
-  @Column({ name: 'last_name', length: 100})
-  lastName: string;
+  @Column({ name: 'last_name', type: 'varchar', length: 100 })
+  private _lastName: string;
 
-  @Column({ name: 'patronymic', length: 100, nullable: true})
-  patronymic: string;
+  @Column({ name: 'patronymic', type: 'varchar', length: 100, nullable: true })
+  private _patronymic: string | null;
 
-  @Column({ name: 'birth_date', type: 'date'})
-  birthDate: Date;
+  @Column({ name: 'birth_date', type: 'date' })
+  private _birthDate: Date;
 
-  // Получены
-  @Column({ name: 'issue_date', type: 'date'})
-  issueDate: Date;
+  @Column({ name: 'issue_date', type: 'date' })
+  private _issueDate: Date;
 
-  // Истекают
-  @Column({ name: 'expiration_date', type: 'date'})
-  expirationDate: Date;
+  @Column({ name: 'expiration_date', type: 'date' })
+  private _expirationDate: Date;
 
+  // Relation - для TypeORM
+  @OneToOne(() => User, user => user.driverLicense, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
+  protected _user: User;
 
-  // #region Relations
+  // Геттеры
+  public get id(): string { return this._id; }
+  public get licenseNumber(): string { return this._licenseNumber; }
+  public get firstName(): string { return this._firstName; }
+  public get lastName(): string { return this._lastName; }
+  public get patronymic(): string | null { return this._patronymic; }
+  public get birthDate(): Date { return this._birthDate; }
+  public get issueDate(): Date { return this._issueDate; }
+  public get expirationDate(): Date { return this._expirationDate; }
+  public get user(): User { return this._user; }
 
-  @OneToOne(() => User, user => user.driverLicense, { onDelete: 'CASCADE'})
-  @JoinColumn({name: 'user_id'})
-  user: User;
-  
-  // #endregion
-
-
-  // #region Methods
-
-  // Не истекли ли права
-  isExpired(): boolean {
-    return this.expirationDate < new Date();
+  // Сеттеры с валидацией
+  public set licenseNumber(licenseNumber: string) {
+    this.validateLicenseNumber(licenseNumber);
+    this._licenseNumber = licenseNumber;
   }
-  getFullName(): string {
-    return [this.lastName, this.firstName, this.patronymic].filter(Boolean).join('');
+
+  public set firstName(firstName: string) {
+    this.validateName(firstName, 'First name');
+    this._firstName = firstName;
   }
-  
-  // #endregion
+
+  public set lastName(lastName: string) {
+    this.validateName(lastName, 'Last name');
+    this._lastName = lastName;
+  }
+
+  public set birthDate(birthDate: Date) {
+    this.validateBirthDate(birthDate);
+    this._birthDate = birthDate;
+  }
+
+  public set expirationDate(expirationDate: Date) {
+    this.validateExpirationDate(expirationDate);
+    this._expirationDate = expirationDate;
+  }
+  public set issueDate(issueDate: Date) {
+    this.validateExpirationDate(issueDate);
+    this._issueDate = issueDate;
+  }
+
+  // Бизнес-логика
+  public isExpired(): boolean {
+    return this._expirationDate < new Date();
+  }
+
+  public getFullName(): string {
+    return [this._lastName, this._firstName, this._patronymic].filter(Boolean).join(' ');
+  }
+
+  public setUser(user: User): void {
+    this._user = user;
+  }
+
+  // Валидации
+  private validateLicenseNumber(licenseNumber: string): void {
+    if (!licenseNumber || licenseNumber.length < 5) {
+      throw new Error('License number must be at least 5 characters long');
+    }
+  }
+
+  private validateName(name: string, fieldName: string): void {
+    if (!name || name.length < 2) {
+      throw new Error(`${fieldName} must be at least 2 characters long`);
+    }
+  }
+
+  private validateBirthDate(birthDate: Date): void {
+    if (birthDate > new Date()) {
+      throw new Error('Birth date cannot be in the future');
+    }
+  }
+
+  private validateExpirationDate(expirationDate: Date): void {
+    if (expirationDate <= new Date()) {
+      throw new Error('Expiration date must be in the future');
+    }
+  }
+
+  // Фабричный метод
+  public static create(
+    licenseNumber: string,
+    firstName: string,
+    lastName: string,
+    birthDate: Date,
+    issueDate: Date,
+    expirationDate: Date,
+    patronymic: string | null = null
+  ): DriverLicense {
+    const driverLicense = new DriverLicense();
+    driverLicense.licenseNumber = licenseNumber;
+    driverLicense.firstName = firstName;
+    driverLicense.lastName = lastName;
+    driverLicense.birthDate = birthDate;
+    driverLicense.issueDate = issueDate;
+    driverLicense.expirationDate = expirationDate;
+    driverLicense._patronymic = patronymic;
+    
+    return driverLicense;
+  }
 }
