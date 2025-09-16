@@ -1,11 +1,18 @@
+// scripts/create-database.ts
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
+import { Logger } from '@nestjs/common';
 
 config({ path: `.env.${process.env.NODE_ENV || 'development'}` });
+
+const logger = new Logger('DatabaseCreator');
 
 export async function createDatabaseIfNotExists() {
   const dbName = process.env.DB_NAME;
 
+  if (!dbName) {
+    throw new Error('DB_NAME environment variable is not set');
+  }
 
   // Создаем DataSource для подключения к системной БД 'postgres'
   const adminDataSource = new DataSource({
@@ -19,6 +26,7 @@ export async function createDatabaseIfNotExists() {
 
   try {
     await adminDataSource.initialize();
+    logger.log('Connected to admin database');
     
     // Проверяем, существует ли уже наша БД
     const result = await adminDataSource.query(
@@ -28,21 +36,22 @@ export async function createDatabaseIfNotExists() {
 
     if (result.length === 0) {
       // Если нет - создаем ее
-      await adminDataSource.query(`CREATE DATABASE ${dbName}`);
-      console.log(`✅Database '${dbName}' created successfully.`);
+      await adminDataSource.query(`CREATE DATABASE "${dbName}"`);
+      logger.log(`✅ Database '${dbName}' created successfully`);
     } 
     else {
-      console.log(`Database '${dbName}' already exists.`);
+      logger.log(`Database '${dbName}' already exists`);
     }
   } 
   catch (error) {
-    console.error(`❌Error creating database '${dbName}':`, error.message);
+    logger.error(`❌ Error creating database '${dbName}':`, error.message);
     throw error;
   } 
   finally {
     // Закрываем соединение с системной БД
     if (adminDataSource.isInitialized) {
       await adminDataSource.destroy();
+      logger.log('Admin database connection closed');
     }
   }
 }

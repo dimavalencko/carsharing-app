@@ -5,31 +5,21 @@
       "name": "Debug Identity Service",
       "type": "node",
       "request": "launch",
-      "program": "${workspaceFolder}/services/identity-service/src/main.ts",
+      "program": "${workspaceFolder}/src/main.ts",
       "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
       "env": {
         "NODE_ENV": "development",
         "DB_HOST": "localhost",
         "DB_PORT": "5432",
         "DB_USERNAME": "postgres",
-        "DB_PASSWORD": "password",
+        "DB_PASSWORD": "root",
         "DB_NAME": "identity_db"
       },
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "skipFiles": ["<node_internals>/**"]
     },
-    {
-      "name": "Debug API Gateway",
-      "type": "node",
-      "request": "launch",
-      "program": "${workspaceFolder}/services/api-gateway/src/main.ts",
-      "runtimeArgs": ["--nolazy", "-r", "ts-node/register"],
-      "env": {
-        "NODE_ENV": "development",
-        "PORT": "3000"
-      }
-    }
+    
   ],
   "compounds": [
     {
