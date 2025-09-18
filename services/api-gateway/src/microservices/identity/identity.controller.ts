@@ -1,12 +1,12 @@
 import { Controller, Post, Get, Body, Param, Put, Inject } from '@nestjs/common';
 import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { IdentityEndpoints } from '@carsharing/common/';
+import { IdentityEndpoints, ServiceNames } from '@carsharing/common';
 
 @Controller('identity')
 export class IdentityController {
   constructor(
-    @Inject('IDENTITY') private readonly identityClient: ClientProxy,
+    @Inject(ServiceNames.IDENTITY) private readonly identityClient: ClientProxy,
   ) {}
 
   async register(@Body() registerData: any) {

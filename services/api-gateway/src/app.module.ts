@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { MicroservicesModule } from './microservices/microservices.module';
 import { IdentityController } from './microservices/identity/identity.controller';
 import { HealthModule } from './health/health.module';
+import { EnvConfigModule } from '@carsharing/common';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { HealthModule } from './health/health.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    EnvConfigModule,
     MicroservicesModule,
     HealthModule
   ],
