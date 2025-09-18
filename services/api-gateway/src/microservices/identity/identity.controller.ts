@@ -1,6 +1,7 @@
 import { Controller, Post, Get, Body, Param, Put, Inject } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, MessagePattern } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { IdentityEndpoints } from '@carsharing/common/';
 
 @Controller('identity')
 export class IdentityController {
@@ -8,11 +9,10 @@ export class IdentityController {
     @Inject('IDENTITY') private readonly identityClient: ClientProxy,
   ) {}
 
-  @Post('register')
   async register(@Body() registerData: any) {
     try {
       const result = await firstValueFrom(
-        this.identityClient.send('identity_register', registerData)
+        this.identityClient.send(IdentityEndpoints.AUTH.REGISTER, registerData)
       );
       return { success: true, data: result };
     } catch (error) {
@@ -20,11 +20,11 @@ export class IdentityController {
     }
   }
 
-  @Post('login')
+  @Post()
   async login(@Body() loginData: any) {
     try {
       const result = await firstValueFrom(
-        this.identityClient.send('identity_login', loginData)
+        this.identityClient.send(IdentityEndpoints.AUTH.LOGIN, loginData)
       );
       return { success: true, data: result };
     } catch (error) {
@@ -33,6 +33,7 @@ export class IdentityController {
   }
 
   @Get('user/:id')
+  @MessagePattern(IdentityEndpoints.USERS.FIND_BY_ID)
   async getUser(@Param('id') userId: string) {
     try {
       const result = await firstValueFrom(
@@ -45,10 +46,10 @@ export class IdentityController {
   }
 
   @Put('user/:id/settings')
-  async updateSettings(@Param('id') userId: string, @Body() settings: any) {
+  async updateUser(@Param('id') userId: string, @Body() settings: any) {
     try {
       const result = await firstValueFrom(
-        this.identityClient.send('identity_update_settings', { userId, settings })
+        this.identityClient.send(IdentityEndpoints.USERS.UPDATE, { userId, settings })
       );
       return { success: true, data: result };
     } catch (error) {
@@ -56,11 +57,23 @@ export class IdentityController {
     }
   }
 
-  @Get('health')
+  @Get('health/identity')
   async healthCheck() {
     try {
       const result = await firstValueFrom(
-        this.identityClient.send('identity_health', {})
+        this.identityClient.send(IdentityEndpoints.HEALTH.CHECK, {})
+      );
+      return { status: 'healthy', identityService: result };
+    } catch (error) {
+      return { status: 'unhealthy', error: error.message };
+    }
+  }
+
+  @Get('health/identity/db')
+  async healthCheckDb() {
+    try {
+      const result = await firstValueFrom(
+        this.identityClient.send(IdentityEndpoints.HEALTH.CHECK_DB, {})
       );
       return { status: 'healthy', identityService: result };
     } catch (error) {
