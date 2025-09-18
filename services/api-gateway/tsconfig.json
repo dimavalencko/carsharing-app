@@ -22,7 +22,8 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@car-rental/common/*": ["../packages/common/src/*"]
+      "@carsharing/common": ["../common/src"],
+      "@carsharing/common/*": ["../common/src/*"]
     }
   }
 }
