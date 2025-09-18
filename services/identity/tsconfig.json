@@ -22,6 +22,8 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
+      "@carsharing/common": ["../common/src"],
+      "@carsharing/common/*": ["../common/src/*"],
       "@/*": ["src/*"],
       "@domain/*": ["src/domain/*"],
       "@infrastructure/*": ["src/infrastructure/*"],
