@@ -4,6 +4,7 @@ import { IAuthService } from '../interfaces/IAuthService';
 import { User, RefreshToken } from '@domain/entities';
 import { TokensDto } from '@app/dto/auth/tokens.dto';
 import type { IUserRepository } from '@domain/interfaces/IUserRepository';
+import { CreateUserDto, UserRole } from '@carsharing/common';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -52,10 +53,36 @@ export class AuthService implements IAuthService {
     return tokens;
   }
 
+  // async register(registerData: CreateUserDto): Promise<TokensDto> {
+  //   const payload = { 
+  //     email: registerData.email, 
+  //     role: UserRole.User,
+  //     firstName: registerData.firstName,
+  //     lastName: registerData.lastName
+  //   };
+
+  //   const tokens = {
+  //     accessToken: this.jwtService.sign(payload),
+  //     refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),
+  //   };
+
+  //   // Создаем и сохраняем refresh token
+  //   const refreshTokenEntity = RefreshToken.create(
+  //     await this.hashToken(tokens.refreshToken),
+  //     new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 дней
+  //     registerData,
+  //   );
+
+  //   user.addRefreshToken(refreshTokenEntity);
+  //   await this.userRepository.save(user);
+
+  //   return tokens;
+  // }
+
   async refreshToken(refreshToken: string, userAgent?: string, ipAddress?: string): Promise<TokensDto> {
     try {
       const payload = this.jwtService.verify(refreshToken);
-      const user = await this.userRepository.findById(payload.sub);
+      const user = await this.userRepository.getById(payload.sub);
 
       if (!user) {
         throw new UnauthorizedException('User not found');
@@ -107,7 +134,7 @@ export class AuthService implements IAuthService {
   }
 
   async logout(userId: string): Promise<void> {
-    const user = await this.userRepository.findById(userId);
+    const user = await this.userRepository.getById(userId);
 
     if(!user) return;
 

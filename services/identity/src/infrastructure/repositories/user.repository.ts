@@ -11,11 +11,11 @@ export class UserRepository implements IUserRepository {
     private readonly ormRepository: Repository<User>,
   ) {}
 
-  async findAll(): Promise<User[]> {
+  async getAll(): Promise<User[]> {
     return this.ormRepository.find();
   }
 
-  async findById(id: string): Promise<User | null> {
+  async getById(id: string): Promise<User | null> {
     return this.ormRepository.findOne({ where: { id } });
   }
 
@@ -29,7 +29,7 @@ export class UserRepository implements IUserRepository {
 
   async update(id: string, userData: Partial<User>): Promise<User> {
     await this.ormRepository.update(id, userData);
-    const updatedUser = await this.findById(id);
+    const updatedUser = await this.getById(id);
     
     if (!updatedUser) {
       throw new Error(`User with id ${id} not found after update`);

@@ -22,13 +22,14 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@carsharing/common": ["../common/src"],
-      "@carsharing/common/*": ["../common/src/*"],
+      "@carsharing/common": ["../common/dist"],
       "@/*": ["src/*"],
       "@domain/*": ["src/domain/*"],
       "@infrastructure/*": ["src/infrastructure/*"],
       "@app/*": ["src/application/*"],
       "@modules/*": ["src/modules/*"],
     }
-  }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "../common/src/**/*"],
 }

@@ -27,7 +27,7 @@ export class Profile {
   // Relation - для TypeORM
   @OneToOne(() => User, user => user.profile, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  protected _user: User;
+  public _user: User;
 
   // Геттеры
   public get id(): number { return this._id; }

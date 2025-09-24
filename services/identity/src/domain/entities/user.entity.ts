@@ -27,17 +27,17 @@ export class User {
 
   // Relations - для TypeORM делаем protected
   @OneToOne(() => Profile, profile => profile.user, { cascade: true, eager: true })
-  protected _profile: Profile;
+  public _profile: Profile;
 
   @OneToOne(() => DriverLicense, driverLicense => driverLicense.user, { cascade: true, eager: true })
-  protected _driverLicense: DriverLicense;
+  public _driverLicense: DriverLicense;
 
   @OneToMany(() => RefreshToken, refreshToken => refreshToken.user)
-  protected _refreshTokens: RefreshToken[];
+  public _refreshTokens: RefreshToken[];
 
   @ManyToOne(() => Role, role => role.users)
   @JoinColumn({ name: 'role_id' })
-  protected _role: Role;
+  public _role: Role;
 
   // Геттеры
   public get id(): string { return this._id; }
