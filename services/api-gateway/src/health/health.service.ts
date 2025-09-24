@@ -1,19 +1,15 @@
+import { ServiceNames } from '@carsharing/common';
 import { Injectable, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom, timeout } from 'rxjs';
+import type { ServiceHealth } from '@carsharing/common' 
 
-export interface ServiceHealth {
-  status: string;
-  service: string;
-  responseTime?: number;
-  timestamp?: string;
-  error?: string;
-}
+
 
 @Injectable()
 export class HealthService {
   constructor(
-    @Inject('IDENTITY') private readonly identityClient: ClientProxy,
+    @Inject(ServiceNames.IDENTITY) private readonly identityClient: ClientProxy,
   ) {}
 
   async checkServiceHealth(serviceName: string, client: ClientProxy, pattern: string): Promise<ServiceHealth> {
@@ -35,7 +31,8 @@ export class HealthService {
       return {
         status: 'unhealthy',
         service: serviceName,
-        error: error.message,
+        dbHealth: 'healthy',
+        errorMessage: error.message,
         responseTime: Date.now() - startTime,
         timestamp: new Date().toISOString()
       };
@@ -43,22 +40,24 @@ export class HealthService {
   }
 
   async checkAllServices() {
-    const services = {};
+    const healthResult: {[serviceName: string]: ServiceHealth} = {};
+    const startTime = Date.now();
     
     // Проверяем Identity Service
-    services['identity'] = await this.checkServiceHealth(
+    healthResult['identity'] = await this.checkServiceHealth(
       'identity', 
       this.identityClient, 
       'identity_health'
     );
 
     // Статус самого API Gateway
-    services['apiGateway'] = {
+    healthResult['apiGateway'] = {
       status: 'healthy',
       service: 'api-gateway',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      responseTime: Date.now() - startTime,
     };
 
-    return services;
+    return healthResult;
   }
 }
