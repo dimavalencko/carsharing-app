@@ -8,13 +8,14 @@
     "dist/**/*"
   ],
   "scripts": {
-    "build": "nest build || tsc -p tsconfig.json",
-    "build:watch": "nest build --watch",
+    "build": "tsc -b tsconfig.build.json",
+    "build:watch": "tsc -b tsconfig.build.json --watch",
     "prepack": "npm run build"
   },
   "dependencies": {
-    "@nestjs/common": "^9.0.0",
-    "@nestjs/microservices": "^9.0.0",
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/microservices": "^11.1.6",
     "class-validator": "^0.13.0",
     "class-transformer": "^0.5.0"
   },

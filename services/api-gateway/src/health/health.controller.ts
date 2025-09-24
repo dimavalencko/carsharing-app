@@ -7,7 +7,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 export class HealthController {
   constructor(private readonly healthService: HealthService) {}
 
-  @Get()
+  @Get('all')
   @ApiOperation({ summary: 'Get health status of all microservices' })
   async checkHealth() {
     const startTime = Date.now();

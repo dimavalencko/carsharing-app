@@ -5,19 +5,21 @@ import { AppService } from './app.service';
 import { MicroservicesModule } from './microservices/microservices.module';
 import { IdentityController } from './microservices/identity/identity.controller';
 import { HealthModule } from './health/health.module';
-import { EnvConfigModule } from '@carsharing/common';
+import { HealthController } from './health/health.controller';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: [
+        '.env',
+        `.env.${process.env.NODE_ENV || 'development'}`,
+      ]
     }),
-    EnvConfigModule,
     MicroservicesModule,
     HealthModule
   ],
-  controllers: [AppController, IdentityController],
+  controllers: [AppController, IdentityController, HealthController],
   providers: [AppService],
 })
 export class AppModule {}
