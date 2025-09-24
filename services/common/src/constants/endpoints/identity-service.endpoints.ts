@@ -1,7 +1,7 @@
 export const IdentityEndpoints = {
   USERS: {
-    FIND_ALL: 'identity.users.findAll',
-    FIND_BY_ID: 'identity.users.findById',
+    GET_ALL: 'identity.users.getAll',
+    GET_BY_ID: 'identity.users.getById',
     CREATE: 'identity.users.create',
     UPDATE: 'identity.users.update',
     DELETE: 'identity.users.delete'

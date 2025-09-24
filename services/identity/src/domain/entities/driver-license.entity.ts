@@ -30,7 +30,7 @@ export class DriverLicense {
   // Relation - для TypeORM
   @OneToOne(() => User, user => user.driverLicense, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  protected _user: User;
+  public _user: User;
 
   // Геттеры
   public get id(): string { return this._id; }

@@ -23,6 +23,7 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@carsharing/common": ["../common/dist"],
+      "@core/*": ["src/core/*"],
     }
   },
   "include": ["src/**/*"],

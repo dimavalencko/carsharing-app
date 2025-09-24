@@ -30,7 +30,7 @@ export class RefreshToken {
   // Relation - для TypeORM
   @ManyToOne(() => User, user => user.refreshTokens, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
-  protected _user: User;
+  public _user: User;
 
   // Геттеры
   public get id(): number { return this._id; }

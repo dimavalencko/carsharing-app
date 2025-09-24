@@ -12,7 +12,7 @@ export class Role {
 
   // Relation - для TypeORM
   @OneToMany(() => User, user => user.role)
-  protected _users: User[];
+  public _users: User[];
 
   // Геттеры
   public get id(): number { return this._id; }
