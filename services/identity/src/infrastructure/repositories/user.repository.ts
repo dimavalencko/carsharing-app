@@ -12,11 +12,11 @@ export class UserRepository implements IUserRepository {
   ) {}
 
   async getAll(): Promise<User[]> {
-    return this.ormRepository.find();
+    return this.ormRepository.find({relations: ['role', 'profile', 'driverLicense']});
   }
 
   async getById(id: string): Promise<User | null> {
-    return this.ormRepository.findOne({ where: { id } });
+    return this.ormRepository.findOne({ where: { id }, relations: ['role', 'profile', 'driverLicense'] });
   }
 
   async findByEmail(email: string): Promise<User | null> {

@@ -9,10 +9,12 @@ async function bootstrap() {
     const nodeEnv: string = configService.get('NODE_ENV', 'development');
     const servicePort: number = configService.get('SERVICE_PORT', 3001);
 
-    const microservice = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
+    const microservice = await NestFactory.createMicroservice<MicroserviceOptions>(
+      AppModule, 
+      {
         transport: Transport.TCP,
         options: {
-          host: 'localhost',
+          host: '0.0.0.0',
           port: servicePort,
         },
       },
