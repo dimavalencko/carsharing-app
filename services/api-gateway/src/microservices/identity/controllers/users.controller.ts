@@ -1,8 +1,5 @@
 import { Controller, Post, Get, Body, Param, Put, Inject, ParseUUIDPipe, Delete } from '@nestjs/common';
-import { MessagePattern } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
 import type { CreateUserDto } from '@carsharing/common';
-import { IdentityEndpoints } from '@carsharing/common';
 import { IdentityProxy } from '../proxy/identity.proxy';
 
 @Controller('identity/users')
