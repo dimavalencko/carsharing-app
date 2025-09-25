@@ -14,7 +14,7 @@ export class IdentityProxy extends BaseProxy {
   }
 
   async getUserById(id: string) {
-    return await this.sendRequest(IdentityEndpoints.USERS.GET_BY_ID, { id });
+    return await this.sendRequest(IdentityEndpoints.USERS.GET_BY_ID, id);
   }
 
   async createUser(userData: CreateUserDto) {

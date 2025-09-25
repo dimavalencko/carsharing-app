@@ -7,7 +7,6 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { IdentityEndpoints } from '@carsharing/common';
 
 @Controller('users')
-@UsePipes(new ValidationPipe())
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -17,10 +16,11 @@ export class UsersController {
     return users.map(user => this.sanitizeUser(user));
   }
 
-  @MessagePattern(IdentityEndpoints.USERS.GET_BY_ID)
-  async findOne(@Payload() data: { id: string }): Promise<Omit<User, 'passwordHash' | 'refreshToken'> | null> {
-    if(data == null) return null;
-    const user = await this.usersService.getById(data.id);
+  @MessagePattern('id')
+  async findOne(id: string): Promise<Omit<User, 'passwordHash' | 'refreshToken'> | null> {
+    console.log('---PAYLOAD DATA---', id);
+    if(id == null) return null;
+    const user = await this.usersService.getById(id);
     return this.sanitizeUser(user);
   }
 
