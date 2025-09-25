@@ -1,24 +1,37 @@
-import { Controller, Post, Get, Body, Param, Put, Inject, ParseUUIDPipe } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, Put, Inject, ParseUUIDPipe, Delete } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import type { CreateUserDto } from '@carsharing/common';
 import { IdentityEndpoints } from '@carsharing/common';
 import { IdentityProxy } from '../proxy/identity.proxy';
 
-@Controller('users')
+@Controller('identity/users')
 export class UsersController {
-  constructor(private readonly identityProxy: IdentityProxy,) {}
-
+  constructor(private readonly identityProxy: IdentityProxy) {}
 
   @Get()
-  @MessagePattern(IdentityEndpoints.USERS.GET_BY_ID)
   async getUsers() {
     return this.identityProxy.getAllUsers();
   }
 
-  @Get('user/:id')
-  @MessagePattern(IdentityEndpoints.USERS.GET_BY_ID)
+  @Get('/:id')
   async getUser(@Param('id', ParseUUIDPipe) userId: string) {
     return this.identityProxy.getUserById(userId);
+  }
+
+  @Post()
+  async createUser(@Body() user: CreateUserDto) {
+    return this.identityProxy.createUser(user)
+  }
+
+  @Put('/:id')
+  async updateUser(@Param('id', ParseUUIDPipe) userId: string, @Body() user: CreateUserDto) {
+    return this.identityProxy.updateUser(userId, user)
+  }
+
+  @Delete('/:id')
+  async deleteUser(@Param('id', ParseUUIDPipe) userId: string) {
+    return this.identityProxy.deleteUser(userId)
   }
 
   // @Put('user/:id/settings')

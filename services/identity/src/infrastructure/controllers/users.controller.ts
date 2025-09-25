@@ -2,9 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode,
 import { UsersService } from '@infrastructure/services/users.service';
 import { CreateUserDto } from '@app/dto/user/create-user.dto';
 import { UpdateUserDto } from '@app/dto/user/update-user.dto';
-import { JwtAuthGuard } from '@app/guards/jwt-auth.guard';
 import { User } from '@domain/entities/user.entity';
-import { MessagePattern } from '@nestjs/microservices';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { IdentityEndpoints } from '@carsharing/common';
 
 @Controller('users')
@@ -19,40 +18,34 @@ export class UsersController {
   }
 
   @MessagePattern(IdentityEndpoints.USERS.GET_BY_ID)
-  async findOne(@Param('id') id: string): Promise<Omit<User, 'passwordHash' | 'refreshToken'>> {
-    const user = await this.usersService.getById(id);
+  async findOne(@Payload() data: { id: string }): Promise<Omit<User, 'passwordHash' | 'refreshToken'> | null> {
+    if(data == null) return null;
+    const user = await this.usersService.getById(data.id);
     return this.sanitizeUser(user);
   }
 
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createUserDto: CreateUserDto): Promise<Omit<User, 'passwordHash' | 'refreshToken'>> {
+  @MessagePattern(IdentityEndpoints.USERS.CREATE)
+  async create(@Payload() createUserDto: CreateUserDto): Promise<Omit<User, 'passwordHash' | 'refreshToken'>> {
     const user = await this.usersService.create(createUserDto);
     return this.sanitizeUser(user);
   }
 
-  @Patch(':id')
-  async update(
-    @Param('id') id: string, 
-    @Body() updateUserDto: UpdateUserDto
-  ): Promise<Omit<User, 'passwordHash' | 'refreshToken'>> {
-    const user = await this.usersService.update(id, updateUserDto);
+  @MessagePattern(IdentityEndpoints.USERS.UPDATE)
+  async update(@Payload() data: { id: string; updateUserDto: UpdateUserDto }): Promise<Omit<User, 'passwordHash' | 'refreshToken'>> {
+    const user = await this.usersService.update(data.id, data.updateUserDto);
     return this.sanitizeUser(user);
   }
   
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string): Promise<void> {
-    return this.usersService.delete(id);
+  @MessagePattern(IdentityEndpoints.USERS.DELETE)
+  async remove(@Payload() data: { id: string }): Promise<void> {
+    return this.usersService.delete(data.id);
   }
 
-  @Post(':id/activate')
   async activate(@Param('id') id: string): Promise<Omit<User, 'passwordHash' | 'refreshToken'>> {
     const user = await this.usersService.activateUser(id);
     return this.sanitizeUser(user);
   }
 
-  @Post(':id/deactivate')
   async deactivate(@Param('id') id: string): Promise<Omit<User, 'passwordHash' | 'refreshToken'>> {
     const user = await this.usersService.deactivateUser(id);
     return this.sanitizeUser(user);

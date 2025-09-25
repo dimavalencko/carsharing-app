@@ -5,90 +5,67 @@ import { DriverLicense } from './driver-license.entity';
 import { RefreshToken } from './refresh-token.entity';
 import { Role } from './role.entity';
 
-@Entity('users')
+@Entity('Users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  private _id: string;
+  id: string;
 
   @Column({ unique: true, length: 255 })
-  private _email: string;
+  email: string;
 
   @Column({ name: 'phone_number', type: 'varchar', unique: true, length: 20 })
-  private _phone: string;
+  phone: string;
   
   @Column({ name: 'password_hash', type: 'varchar', length: 255 })
-  private _passwordHash: string;
+  passwordHash: string;
 
   @CreateDateColumn({ name: 'created_at' })
-  private _createdAt: Date;
+  createdAt: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  private _updatedAt: Date;
+  updatedAt: Date;
 
   // Relations - для TypeORM делаем protected
   @OneToOne(() => Profile, profile => profile.user, { cascade: true, eager: true })
-  public _profile: Profile;
+  profile: Profile;
 
   @OneToOne(() => DriverLicense, driverLicense => driverLicense.user, { cascade: true, eager: true })
-  public _driverLicense: DriverLicense;
+  driverLicense: DriverLicense;
 
   @OneToMany(() => RefreshToken, refreshToken => refreshToken.user)
-  public _refreshTokens: RefreshToken[];
+  refreshTokens: RefreshToken[];
 
   @ManyToOne(() => Role, role => role.users)
   @JoinColumn({ name: 'role_id' })
-  public _role: Role;
-
-  // Геттеры
-  public get id(): string { return this._id; }
-  public get email(): string { return this._email; }
-  public get phone(): string { return this._phone; }
-  public get passwordHash(): string { return this._passwordHash; }
-  public get createdAt(): Date { return this._createdAt; }
-  public get updatedAt(): Date { return this._updatedAt; }
-  public get profile(): Profile { return this._profile; }
-  public get driverLicense(): DriverLicense { return this._driverLicense; }
-  public get refreshTokens(): RefreshToken[] { return this._refreshTokens; }
-  public get role(): Role { return this._role; }
-
-  // Сеттеры с валидацией
-  public set email(email: string) { 
-    this.validateEmail(email);
-    this._email = email; 
-  }
-
-  public set phone(phone: string) { 
-    this.validatePhone(phone);
-    this._phone = phone; 
-  }
+  role: Role;
 
   // Бизнес-методы
   public async setPassword(password: string): Promise<void> {
     this.validatePasswordStrength(password);
-    this._passwordHash = await this.hashPassword(password);
+    this.passwordHash = await this.hashPassword(password);
   }
 
   public async validatePassword(password: string): Promise<boolean> {
-    return bcrypt.compare(password, this._passwordHash);
+    return bcrypt.compare(password, this.passwordHash);
   }
 
   public setProfile(profile: Profile): void {
-    this._profile = profile;
+    this.profile = profile;
   }
 
   public setDriverLicense(driverLicense: DriverLicense): void {
-    this._driverLicense = driverLicense;
+    this.driverLicense = driverLicense;
   }
 
   public setRole(role: Role): void {
-    this._role = role;
+    this.role = role;
   }
 
   public addRefreshToken(refreshToken: RefreshToken): void {
-    if (!this._refreshTokens) {
-      this._refreshTokens = [];
+    if (!this.refreshTokens) {
+      this.refreshTokens = [];
     }
-    this._refreshTokens.push(refreshToken);
+    this.refreshTokens.push(refreshToken);
   }
 
   public revokeRefreshToken(tokenHash: string): void {
@@ -135,8 +112,7 @@ export class User {
     const saltRounds = 12;
     return bcrypt.hash(password, saltRounds);
   }
-
-  // Фабричный метод
+  
   public static async create(
     email: string,
     phone: string,
@@ -147,8 +123,8 @@ export class User {
     const user = new User();
     user.email = email;
     user.phone = phone;
-    user._profile = profile;
-    user._role = role;
+    user.profile = profile;
+    user.role = role;
     
     await user.setPassword(password);
     
