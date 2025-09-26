@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode, HttpStatus, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Param } from '@nestjs/common';
 import { UsersService } from '@infrastructure/services/users.service';
 import { CreateUserDto } from '@app/dto/user/create-user.dto';
 import { UpdateUserDto } from '@app/dto/user/update-user.dto';
@@ -10,25 +10,40 @@ import { IdentityEndpoints } from '@carsharing/common';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @MessagePattern(IdentityEndpoints.USERS.GET_ALL)
+  @MessagePattern({ cmd: IdentityEndpoints.USERS.GET_ALL })
   async getAll(): Promise<Array<Omit<User, 'passwordHash' | 'refreshToken'>>> {
     const users = await this.usersService.getAll();
     return users.map(user => this.sanitizeUser(user));
   }
 
-  @MessagePattern('id')
-  async findOne(id: string): Promise<Omit<User, 'passwordHash' | 'refreshToken'> | null> {
-    console.log('---PAYLOAD DATA---', id);
-    if(id == null) return null;
-    const user = await this.usersService.getById(id);
+
+
+
+  @MessagePattern(IdentityEndpoints.USERS.GET_BY_ID)
+  async getUserById(@Payload() data: any): Promise<User | null> {
+    console.log('---PAYLOAD DATA---', data);
+    console.log('---PAYLOAD TYPE---', typeof data);
+    console.log('---PIDOR TYPE---', typeof data);
+    if(data === null || data === undefined) { 
+      return null;
+    }
+
+    const user = await this.usersService.getById(data);
     return this.sanitizeUser(user);
   }
 
-  @MessagePattern(IdentityEndpoints.USERS.CREATE)
+
+  @MessagePattern({ cmd: IdentityEndpoints.USERS.CREATE })
   async create(@Payload() createUserDto: CreateUserDto): Promise<Omit<User, 'passwordHash' | 'refreshToken'>> {
     const user = await this.usersService.create(createUserDto);
     return this.sanitizeUser(user);
   }
+
+
+
+
+
+
 
   @MessagePattern(IdentityEndpoints.USERS.UPDATE)
   async update(@Payload() data: { id: string; updateUserDto: UpdateUserDto }): Promise<Omit<User, 'passwordHash' | 'refreshToken'>> {

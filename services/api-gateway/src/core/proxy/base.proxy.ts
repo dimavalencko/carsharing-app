@@ -8,9 +8,14 @@ export abstract class BaseProxy {
 
   async sendRequest(pattern: string, data: any) {
     try {
+      console.log('🔵 [BaseProxy] SENDING:');
+      console.log('🔵 [BaseProxy] Pattern:', pattern);
+      console.log('🔵 [BaseProxy] Data:', data);
+      console.log('🔵 [BaseProxy] Data type:', typeof data);
       const response = await firstValueFrom(
-        this.client.send('id', data)
+        this.client.send(pattern, data)
       );
+      console.log('🔵 [BaseProxy] RESPONSE:', response);
       return response;
     } 
     catch (error) {
