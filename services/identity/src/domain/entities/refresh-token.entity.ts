@@ -32,38 +32,38 @@ export class RefreshToken {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-    // Бизнес-логика
-    public revoke(): void {
-      this.revoked = true;
-    }
-  
-    public isExpired(): boolean {
-      return this.expiresAt < new Date();
-    }
-  
-    public isValid(): boolean {
-      return !this.revoked && !this.isExpired();
-    }
-  
-    public setUser(user: User): void {
-      this.user = user;
-    }
-  
-    // Фабричный метод
-    public static create(
-      tokenHash: string,
-      expiresAt: Date,
-      user: User,
-      userAgent?: string,
-      ipAddress?: string
-    ): RefreshToken {
-      const refreshToken = new RefreshToken();
-      refreshToken.tokenHash = tokenHash;
-      refreshToken.expiresAt = expiresAt;
-      refreshToken.user = user;
-      refreshToken.userAgent = userAgent || null;
-      refreshToken.ipAddress = ipAddress || null;
-      
-      return refreshToken;
-    }
+  // Бизнес-логика
+  public revoke(): void {
+    this.revoked = true;
+  }
+
+  public isExpired(): boolean {
+    return this.expiresAt < new Date();
+  }
+
+  public isValid(): boolean {
+    return !this.revoked && !this.isExpired();
+  }
+
+  public setUser(user: User): void {
+    this.user = user;
+  }
+
+  // Фабричный метод
+  public static create(
+    tokenHash: string,
+    expiresAt: Date,
+    user: User,
+    userAgent?: string,
+    ipAddress?: string
+  ): RefreshToken {
+    const refreshToken = new RefreshToken();
+    refreshToken.tokenHash = tokenHash;
+    refreshToken.expiresAt = expiresAt;
+    refreshToken.user = user;
+    refreshToken.userAgent = userAgent || null;
+    refreshToken.ipAddress = ipAddress || null;
+    
+    return refreshToken;
+  }
 }

@@ -9,7 +9,7 @@ export abstract class BaseProxy {
   async sendRequest(pattern: string, data: any) {
     try {
       const response = await firstValueFrom(
-        this.client.send('id', data)
+        this.client.send(pattern, data)
       );
       return response;
     } 

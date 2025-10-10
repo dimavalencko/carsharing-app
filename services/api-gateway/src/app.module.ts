@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MicroservicesModule } from './microservices/microservices.module';
 import { UsersController } from './microservices/identity/controllers/users.controller';
+import { AuthController } from './microservices/identity/controllers/auth.controller';
 import { HealthModule } from './health/health.module';
 import { HealthController } from './health/health.controller';
 import { IdentityModule } from './microservices/identity/identity.module';
@@ -21,7 +22,7 @@ import { IdentityModule } from './microservices/identity/identity.module';
     MicroservicesModule,
     HealthModule
   ],
-  controllers: [AppController, UsersController, HealthController],
+  controllers: [AppController, UsersController, AuthController, HealthController],
   providers: [AppService],
 })
 

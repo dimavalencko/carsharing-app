@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { BaseProxy } from '@core/proxy/base.proxy';
-import { ServiceNames, IdentityEndpoints, CreateUserDto } from '@carsharing/common';
+import { ServiceNames, IdentityEndpoints, CreateUserDto, LoginUserDto, RegisterUserDto } from '@carsharing/common';
 
 @Injectable()
 export class IdentityProxy extends BaseProxy {
@@ -29,13 +29,13 @@ export class IdentityProxy extends BaseProxy {
     return await this.sendRequest(IdentityEndpoints.USERS.DELETE, { id });
   }
 
-  // async login(credentials: any) {
-  //   return this.sendRequest('auth_login', credentials);
-  // }
+  async login(data: LoginUserDto) {
+    return this.sendRequest(IdentityEndpoints.AUTH.LOGIN, data);
+  }
 
-  // async register(userData: any) {
-  //   return this.sendRequest('auth_register', userData);
-  // }
+  async register(userData: RegisterUserDto) {
+    return this.sendRequest(IdentityEndpoints.AUTH.REGISTER, userData);
+  }
 
   // async healthCheck() {
   //   return this.sendRequest('health_check', {});
