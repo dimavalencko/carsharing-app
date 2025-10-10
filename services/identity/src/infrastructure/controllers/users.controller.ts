@@ -16,8 +16,8 @@ export class UsersController {
     return users.map(user => this.sanitizeUser(user));
   }
 
-  @MessagePattern('id')
-  async findOne(id: string): Promise<Omit<User, 'passwordHash' | 'refreshToken'> | null> {
+  @MessagePattern(IdentityEndpoints.USERS.GET_BY_ID)
+  async findOne(@Payload() id: string): Promise<Omit<User, 'passwordHash' | 'refreshToken'> | null> {
     console.log('---PAYLOAD DATA---', id);
     if(id == null) return null;
     const user = await this.usersService.getById(id);

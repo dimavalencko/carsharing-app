@@ -17,7 +17,7 @@ export class User {
   phone: string;
   
   @Column({ name: 'password_hash', type: 'varchar', length: 255 })
-  passwordHash: string;
+  protected passwordHash: string;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
@@ -40,6 +40,10 @@ export class User {
   role: Role;
 
   // Бизнес-методы
+  public getPasswordHash(): string {
+    return this.passwordHash;
+  }
+
   public async setPassword(password: string): Promise<void> {
     this.validatePasswordStrength(password);
     this.passwordHash = await this.hashPassword(password);
@@ -98,11 +102,9 @@ export class User {
     if (password.length < 8) {
       throw new Error('Password must be at least 8 characters long');
     }
-    
     if (!/[A-Z]/.test(password)) {
       throw new Error('Password must contain at least one uppercase letter');
     }
-    
     if (!/[0-9]/.test(password)) {
       throw new Error('Password must contain at least one number');
     }
@@ -125,9 +127,7 @@ export class User {
     user.phone = phone;
     user.profile = profile;
     user.role = role;
-    
     await user.setPassword(password);
-    
     return user;
   }
 }
