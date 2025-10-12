@@ -1,10 +1,12 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import type { IRoleService, IUserService } from '@domain/interfaces/services';
 import type { IUserRepository, IDriverLicenseRepository, IUserProfileRepository } from '@domain/interfaces/repositories';
-import { User } from 'src/domain/entities/user.entity';
 import { Email } from 'src/domain/value-objects/email.vo';
 import { randomUUID } from 'crypto';
-import { UpdateUserDto, UserResponseDto } from '@carsharing/common';
+import { UpdateProfileDto, UpdateUserDto, UserProfileResponseDto, UserResponseDto } from '@carsharing/common';
+import { UserProfile } from '@/domain/entities';
+
+
 @Injectable()
 export class UserService implements IUserService {
   constructor(
@@ -40,6 +42,7 @@ export class UserService implements IUserService {
       throw new NotFoundException('User not found');
     }
 
+    // Обновляем основные данные
     if (dto.firstName || dto.lastName || dto.dateOfBirth) {
       user.updatePersonalInfo(
         dto.firstName || user.firstName,
@@ -48,6 +51,7 @@ export class UserService implements IUserService {
       );
     }
 
+    // Теперь можем устанавливать phone и patronymic через сеттеры
     if (dto.phone !== undefined) {
       user.phone = dto.phone;
     }
@@ -67,7 +71,7 @@ export class UserService implements IUserService {
   }
 
   async getUserProfile(userId: string): Promise<UserProfileResponseDto> {
-    const user = await this.userRepository.findById(userId);
+    const user = await this.userRepository.getById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -78,10 +82,7 @@ export class UserService implements IUserService {
 
     return {
       user: this.mapUserToResponseDto(user, role.name),
-      profile: profile ? {
-        profilePicture: profile.profilePicture,
-        city: profile.city,
-      } : null,
+      profile: { ...profile },
       driverLicense: driverLicense ? {
         licenseNumber: driverLicense.licenseNumber,
         issueDate: driverLicense.issueDate,
@@ -91,7 +92,7 @@ export class UserService implements IUserService {
   }
 
   async updateUserProfile(userId: string, dto: UpdateProfileDto): Promise<UserProfileResponseDto> {
-    const user = await this.userRepository.findById(userId);
+    const user = await this.userRepository.getById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -107,48 +108,18 @@ export class UserService implements IUserService {
     return this.getUserProfile(userId);
   }
 
-  async userExists(email: string): Promise<boolean> {
-    const user = await this.userRepository.findByEmail(new Email(email));
-    return !!user;
-  }
-
-  async isUserAdult(userId: string): Promise<boolean> {
-    const user = await this.userRepository.findById(userId);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    return user.isAdult();
-  }
-
-  async getUserWithRelations(userId: string): Promise<any> {
-    const user = await this.userRepository.findById(userId);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-
-    const profile = await this.userProfileRepository.findByUserId(userId);
-    const role = await this.roleService.getUserRole(user.id);
-    const driverLicense = await this.driverLicenseRepository.findByUserId(userId);
-
-    return {
-      user: this.mapUserToResponseDto(user, role.name),
-      profile,
-      driverLicense,
-    };
-  }
-
-  private mapUserToResponseDto(user: User, role: string): UserResponseDto {
+  private mapUserToResponseDto(user: any, role: string): UserResponseDto {
     return {
       id: user.id,
       email: user.email.getValue(),
       firstName: user.firstName,
       lastName: user.lastName,
-      patronymic: user.patronymic,
+      patronymic: user.patronymic || undefined,
       dateOfBirth: user.dateOfBirth,
-      phone: user.phone,
+      phone: user.phone || undefined,
       role,
       createdAt: user.createdAt,
-      lastLoginAt: user.lastLoginAt,
+      lastLoginAt: user.lastLoginAt || undefined,
     };
   }
 }

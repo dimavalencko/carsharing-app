@@ -20,13 +20,11 @@ export class AuthService implements IAuthService {
   ) {}
 
   async register(dto: RegisterDto): Promise<AuthResponseDto> {
-    // Check if user already exists
     const existingUser = await this.userRepository.findByEmail(new Email(dto.email));
     if (existingUser) {
       throw new ConflictException('User with this email already exists');
     }
 
-    // Get default user role
     const userRole = await this.roleService.getRoleByName('User');
     if (!userRole) {
       throw new Error('Default user role not found');
@@ -71,8 +69,7 @@ export class AuthService implements IAuthService {
       const storedToken = await this.refreshTokenRepository.findByTokenHash(tokenHash);
       
       if (storedToken) {
-        storedToken.revoke();
-        await this.refreshTokenRepository.save(storedToken);
+        await this.refreshTokenRepository.delete(storedToken.id);
       }
     } else {
       await this.refreshTokenRepository.revokeAllForUser(userId);
@@ -92,15 +89,14 @@ export class AuthService implements IAuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    storedToken.revoke();
-    await this.refreshTokenRepository.save(storedToken);
+    await this.refreshTokenRepository.delete(storedToken.id);
 
-    const newRefreshToken = randomUUID();
+    const newRefreshToken = this.tokenService.generateRefreshToken();
     const newRefreshTokenEntity = new RefreshToken(
       randomUUID(),
       user.id,
       new PasswordHash(await this.passwordHasher.hash(newRefreshToken)),
-      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     );
 
     await this.refreshTokenRepository.save(newRefreshTokenEntity);
@@ -153,8 +149,7 @@ export class AuthService implements IAuthService {
     const newPasswordHash = new PasswordHash(await this.passwordHasher.hash(dto.newPassword));
     user.changePassword(newPasswordHash);
     await this.userRepository.save(user);
-
-    await this.refreshTokenRepository.revokeAllForUser(userId);
+    await this.revokeAllUserSessions(userId);
   }
 
   async revokeAllUserSessions(userId: string): Promise<void> {
@@ -172,7 +167,7 @@ export class AuthService implements IAuthService {
       hasDriverLicense,
     });
 
-    const refreshToken = randomUUID();
+    const refreshToken = this.tokenService.generateRefreshToken();
     
     const refreshTokenEntity = new RefreshToken(
       randomUUID(),
