@@ -45,12 +45,6 @@ export class UsersController {
     return this.sanitizeUser(user);
   }
 
-
-
-
-
-
-
   @MessagePattern(IdentityEndpoints.USERS.UPDATE)
   async update(@Payload() data: { id: string; updateUserDto: UpdateUserDto }): Promise<Omit<User, 'passwordHash' | 'refreshToken'>> {
     const user = await this.usersService.update(data.id, data.updateUserDto);

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { Role } from '@domain/entities';
-import { UserRoles } from '@domain/enums/user-roles';
+import { UserRole } from '@carsharing/common';
 
 @Injectable()
 export class SeederService {
@@ -19,7 +19,7 @@ export class SeederService {
     const roleRepository = this.dataSource.getRepository(Role);
   
     // Получаем все роли из enum
-    const rolesToSeed = Object.values(UserRoles).map(roleName => {
+    const rolesToSeed = Object.values(UserRole).map(roleName => {
       const role = new Role();
       role.name = roleName;
       return role;

@@ -2,7 +2,7 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { IUsersService } from '@domain/interfaces/IUsersService';
 import { User, Profile, Role } from '@domain/entities';
 import type { IUserRepository } from '@domain/interfaces/IUserRepository';
-import { UserRoles } from '@domain/enums/user-roles';
+import { UserRole } from '@carsharing/common';
 
 @Injectable()
 export class UsersService implements IUsersService {
@@ -87,7 +87,7 @@ export class UsersService implements IUsersService {
     // Здесь должна быть логика получения роли по умолчанию
     // Например, из базы данных или конфигурации
     const defaultRole = new Role();
-    defaultRole.name = UserRoles.USER;
+    defaultRole.name = UserRole.UnauthorizedUser;
     return defaultRole;
   }
 }
