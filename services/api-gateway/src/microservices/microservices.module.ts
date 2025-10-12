@@ -1,18 +1,19 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ServiceNames } from '@carsharing/common'
 
 @Module({
   imports: [
     ClientsModule.registerAsync([
       {
-        name: 'IDENTITY',
+        name: ServiceNames.IDENTITY,
         imports: [ConfigModule],
-        useFactory: (configService: ConfigService) => ({
+        useFactory: (envConfigService: ConfigService) => ({
           transport: Transport.TCP,
           options: {
-            host: configService.get('IDENTITY_HOST', 'localhost'),
-            port: configService.get('IDENTITY_PORT', 3001),
+            host: envConfigService.get('IDENTITY_SERVICE_HOST') ?? 'localhost',
+            port: envConfigService.get('IDENTITY_SERVICE_PORT') ?? 3001,
           },
         }),
         inject: [ConfigService],

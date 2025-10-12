@@ -1,15 +1,16 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { LoginUserDto } from '@app/dto/auth/login-user.dto';
 import { TokensDto } from '@app/dto/auth/tokens.dto';
+import { MessagePattern, Payload } from '@nestjs/microservices';
+import { IdentityEndpoints } from '@carsharing/common';
 
-@Controller('auth')
+@Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('login')
-  @HttpCode(HttpStatus.OK)
-  async login(@Body() loginUserDto: LoginUserDto): Promise<TokensDto> {
+  @MessagePattern(IdentityEndpoints.AUTH.LOGIN)
+  async login(@Payload() loginUserDto: LoginUserDto): Promise<TokensDto> {
     const user = await this.authService.validateUser(
       loginUserDto.email,
       loginUserDto.password,
@@ -17,15 +18,13 @@ export class AuthController {
     return this.authService.login(user);
   }
 
-  @Post('refresh')
-  @HttpCode(HttpStatus.OK)
-  async refresh(@Body('refreshToken') refreshToken: string): Promise<TokensDto> {
-    return this.authService.refreshToken(refreshToken);
+  @MessagePattern(IdentityEndpoints.AUTH.REFRESH)
+  async refresh(@Payload() data: { refreshToken: string }): Promise<TokensDto> {
+    return this.authService.refreshToken(data.refreshToken);
   }
 
-  @Post('logout')
-  @HttpCode(HttpStatus.OK)
-  async logout(@Body('userId') userId: string): Promise<void> {
-    return this.authService.logout(userId);
-  }
+  // @MessagePattern(IdentityEndpoints.AUTH.LOGOUT)
+  // async logout(@Payload() data: { userId: string }): Promise<void> {
+  //   return this.authService.logout(data.userId);
+  // }
 }

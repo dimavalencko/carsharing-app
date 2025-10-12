@@ -4,13 +4,15 @@ import { MessagePattern } from '@nestjs/microservices';
 
 @Controller('health')
 export class HealthController {
+
   constructor(private readonly healthService: HealthService) {}
-  @MessagePattern('identity_health')
+  
+  @MessagePattern('identity.health.check')
   async checkHealth() {
     return this.healthService.checkHealth();
   }
 
-  @MessagePattern('db_health')
+  @MessagePattern('identity.health.check_db')
   async checkDatabase() {
     return this.healthService.checkDatabase();
   }

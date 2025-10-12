@@ -1,0 +1,29 @@
+{
+  "name": "carsharing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Carsharing Microservices",
+  "workspaces": [
+    "services/*"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "build": "npm run build:common && npm run build:services",
+    "build:common": "npm run build --workspace=services/common",
+    "build:services": "npm run build --workspaces --if-present",
+    "dev:common": "npm run build:watch --workspace=services/common",
+    "dev:identity": "npm run build:common && cd services/identity && npm run start:dev",
+    "dev:gateway": "npm run build:common && cd services/api-gateway && npm run start:dev",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.0",
+    "@types/node": "^18.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=7.0.0"
+  }
+}

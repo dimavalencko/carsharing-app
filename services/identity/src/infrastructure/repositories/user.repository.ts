@@ -11,12 +11,12 @@ export class UserRepository implements IUserRepository {
     private readonly ormRepository: Repository<User>,
   ) {}
 
-  async findAll(): Promise<User[]> {
-    return this.ormRepository.find();
+  async getAll(): Promise<User[]> {
+    return this.ormRepository.find({relations: ['role', 'profile', 'driverLicense']});
   }
 
-  async findById(id: string): Promise<User | null> {
-    return this.ormRepository.findOne({ where: { id } });
+  async getById(id: string): Promise<User | null> {
+    return this.ormRepository.findOne({ where: { id }, relations: ['role', 'profile', 'driverLicense'] });
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -29,7 +29,7 @@ export class UserRepository implements IUserRepository {
 
   async update(id: string, userData: Partial<User>): Promise<User> {
     await this.ormRepository.update(id, userData);
-    const updatedUser = await this.findById(id);
+    const updatedUser = await this.getById(id);
     
     if (!updatedUser) {
       throw new Error(`User with id ${id} not found after update`);

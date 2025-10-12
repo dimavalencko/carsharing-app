@@ -3,19 +3,27 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MicroservicesModule } from './microservices/microservices.module';
-import { IdentityController } from './microservices/identity/identity.controller';
+import { UsersController } from './microservices/identity/controllers/users.controller';
+import { AuthController } from './microservices/identity/controllers/auth.controller';
 import { HealthModule } from './health/health.module';
+import { HealthController } from './health/health.controller';
+import { IdentityModule } from './microservices/identity/identity.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: [
+        '.env',
+        `.env.${process.env.NODE_ENV || 'development'}`,
+      ]
     }),
+    IdentityModule,
     MicroservicesModule,
     HealthModule
   ],
-  controllers: [AppController, IdentityController],
+  controllers: [AppController, UsersController, AuthController, HealthController],
   providers: [AppService],
 })
+
 export class AppModule {}

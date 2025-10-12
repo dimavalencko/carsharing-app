@@ -30,6 +30,7 @@ import { createDatabaseIfNotExists } from 'scripts/create-database';
           retryAttempts: 5,
           retryDelay: 3000,
           autoLoadEntities: true,
+          metadataTableName: 'typeorm_metadata'
         };
       },
       inject: [ConfigService],
