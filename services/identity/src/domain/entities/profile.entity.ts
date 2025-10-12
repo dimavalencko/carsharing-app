@@ -15,7 +15,7 @@ export class UserProfile {
   get createdAt(): Date { return this._createdAt; }
   get updatedAt(): Date { return this._updatedAt; }
 
-  updateProfile(profilePicture?: string, city?: string, bio?: string): void {
+  updateProfile(profilePicture?: string, city?: string): void {
     if (profilePicture !== undefined) this._profilePicture = profilePicture;
     if (city !== undefined) this._city = city;
     this._updatedAt = new Date();
