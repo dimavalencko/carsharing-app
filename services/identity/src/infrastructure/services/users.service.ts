@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { IUsersService } from '@domain/interfaces/IUsersService';
+import { IUsersService } from '@/domain/interfaces/services/IUsersService';
 import { User, Profile, Role } from '@domain/entities';
-import type { IUserRepository } from '@domain/interfaces/IUserRepository';
+import type { IUserRepository } from '@/domain/interfaces/repositories/IUserRepository';
 import { UserRole } from '@carsharing/common';
 
 @Injectable()

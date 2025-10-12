@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { IAuthService } from '../interfaces/IAuthService';
 import { User, RefreshToken } from '@domain/entities';
 import { TokensDto } from '@app/dto/auth/tokens.dto';
-import type { IUserRepository } from '@domain/interfaces/IUserRepository';
+import type { IUserRepository } from '@/domain/interfaces/repositories/IUserRepository';
 
 @Injectable()
 export class AuthService implements IAuthService {

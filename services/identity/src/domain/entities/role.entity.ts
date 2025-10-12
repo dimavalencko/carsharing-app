@@ -1,16 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { User } from './user.entity';
-import { UserRole } from '@carsharing/common';
+export class UserRole {
+  constructor(
+    private readonly _id: string,
+    private _name: string,
+  ) {}
 
-@Entity('Roles')
-export class Role {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ unique: true, type: 'enum', enum: UserRole, default: UserRole.UnauthorizedUser })
-  name: UserRole;
-
-  // Relation - для TypeORM
-  @OneToMany(() => User, user => user.role)
-  users: User[];
+  get id(): string { return this._id; }
+  get name(): string { return this._name; }
 }
