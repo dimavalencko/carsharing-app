@@ -1,5 +1,5 @@
 import { User } from '@domain/entities/user.entity';
-import { TokensDto } from '@app/dto/auth/tokens.dto';
+import { TokensDto } from '@carsharing/common';
 
 export interface IAuthService {
   validateUser(email: string, password: string): Promise<User>;

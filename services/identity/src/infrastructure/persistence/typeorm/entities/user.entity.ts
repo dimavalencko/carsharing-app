@@ -21,13 +21,13 @@ export class UserEntity {
   @Column()
   lastName: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   patronymic: string | null;
 
   @Column()
   dateOfBirth: Date;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   phone: string | null;
 
   @Column()
