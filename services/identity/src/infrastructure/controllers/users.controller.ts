@@ -10,20 +10,19 @@ import { IdentityEndpoints } from '@carsharing/common';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @MessagePattern({ cmd: IdentityEndpoints.USERS.GET_ALL })
+  @MessagePattern(IdentityEndpoints.USERS.GET_ALL)
   async getAll(): Promise<Array<Omit<User, 'passwordHash' | 'refreshToken'>>> {
     const users = await this.usersService.getAll();
     return users.map(user => this.sanitizeUser(user));
   }
 
-<<<<<<< HEAD
   @MessagePattern(IdentityEndpoints.USERS.GET_BY_ID)
   async findOne(@Payload() id: string): Promise<Omit<User, 'passwordHash' | 'refreshToken'> | null> {
     console.log('---PAYLOAD DATA---', id);
     if(id == null) return null;
     const user = await this.usersService.getById(id);
-=======
-
+    return user ? this.sanitizeUser(user) : null;
+  }
 
 
   @MessagePattern(IdentityEndpoints.USERS.GET_BY_ID)
@@ -36,7 +35,6 @@ export class UsersController {
     }
 
     const user = await this.usersService.getById(data);
->>>>>>> f8d4ad5e601f0b9603d014ffbf2e4b30c8be61e7
     return this.sanitizeUser(user);
   }
 
