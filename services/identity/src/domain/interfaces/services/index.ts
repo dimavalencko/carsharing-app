@@ -5,4 +5,4 @@ export * from './IEventPublichser';
 export * from './IPasswordHasher';
 export * from './IRolesService';
 export * from './ITokenService';
-export * from './IUsersService';
+export * from './IUserService';

@@ -1,14 +1,10 @@
-// src/application/services/user.service.ts
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { IUserService } from 'src/domain/interfaces/services/user-service.interface';
-import { IUserRepository } from 'src/domain/interfaces/repositories/user.repository.interface';
-import { IUserProfileRepository } from 'src/domain/interfaces/repositories/user-profile.repository.interface';
-import { IRoleService } from 'src/domain/interfaces/services/role-service.interface';
-import { IDriverLicenseRepository } from 'src/domain/interfaces/repositories/driver-license.repository.interface';
-import { UpdateUserDto, UpdateProfileDto, UserResponseDto, UserProfileResponseDto } from 'common/dto/user';
-import { UserProfile } from 'src/domain/entities/user-profile.entity';
+import type { IRoleService, IUserService } from '@domain/interfaces/services';
+import type { IUserRepository, IDriverLicenseRepository, IUserProfileRepository } from '@domain/interfaces/repositories';
+import { User } from 'src/domain/entities/user.entity';
+import { Email } from 'src/domain/value-objects/email.vo';
 import { randomUUID } from 'crypto';
-
+import { UpdateUserDto, UserResponseDto } from '@carsharing/common';
 @Injectable()
 export class UserService implements IUserService {
   constructor(
@@ -19,7 +15,7 @@ export class UserService implements IUserService {
   ) {}
 
   async getUserById(id: string): Promise<UserResponseDto> {
-    const user = await this.userRepository.findById(id);
+    const user = await this.userRepository.getById(id);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -39,7 +35,7 @@ export class UserService implements IUserService {
   }
 
   async updateUser(userId: string, dto: UpdateUserDto): Promise<UserResponseDto> {
-    const user = await this.userRepository.findById(userId);
+    const user = await this.userRepository.getById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
