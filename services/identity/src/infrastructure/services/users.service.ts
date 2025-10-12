@@ -18,12 +18,12 @@ export class UsersService implements IUsersService {
     throw new Error('Method not implemented.');
   }
 
-  async findAll(): Promise<User[]> {
-    return this.userRepository.findAll();
+  async getAll(): Promise<User[]> {
+    return this.userRepository.getAll();
   }
 
-  async findById(id: string): Promise<User> {
-    const user = await this.userRepository.findById(id);
+  async getById(id: string): Promise<User> {
+    const user = await this.userRepository.getById(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -60,7 +60,7 @@ export class UsersService implements IUsersService {
   }
 
   async update(id: string, userData: Partial<User>): Promise<User> {
-    const user = await this.findById(id);
+    const user = await this.getById(id);
     
     // Обновляем поля
     if (userData.email) user.email = userData.email;
@@ -79,7 +79,7 @@ export class UsersService implements IUsersService {
   }
 
   async delete(id: string): Promise<void> {
-    const user = await this.findById(id);
+    const user = await this.getById(id);
     return this.userRepository.delete(id);
   }
 

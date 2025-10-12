@@ -3,18 +3,18 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "dev": "npm run start:dev --workspaces --if-present",
     "dev:all": "concurrently \"npm:dev:*\"",
     "dev:gateway": "npm run start:dev --workspace=services/api-gateway",
     "dev:identity": "npm run start:dev --workspace=services/identity-service",
-    "dev:auth": "npm run start:dev --workspace=services/auth-service",
-    "dev:user": "npm run start:dev --workspace=services/user-service",
-    "dev:order": "npm run start:dev --workspace=services/order-service",
-    
+    "build:common": "cd ./packages/common && npm run build",
     "install:all": "npm install --workspaces",
     "build:all": "npm run build --workspaces"
   },
   "workspaces": [
-    "services/*"
+    "api-gateway",
+    "identity",
+    "common"
   ],
   "devDependencies": {
     "@nestjs/cli": "^10.0.0"
