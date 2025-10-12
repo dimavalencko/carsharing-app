@@ -1,44 +1,60 @@
+// src/infrastructure/persistence/repositories/user.repository.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '@domain/entities/user.entity';
-import { IUserRepository } from '@/domain/interfaces/repositories/IUserRepository';
+import { IUserRepository } from '@domain/interfaces/repositories';
+import { User } from 'src/domain/entities/user.entity';
+import { UserEntity, UserMapper } from '../persistence/typeorm';
+import { Email } from '@domain/value-objects/email.vo';
+
 
 @Injectable()
 export class UserRepository implements IUserRepository {
   constructor(
-    @InjectRepository(User)
-    private readonly ormRepository: Repository<User>,
+    @InjectRepository(UserEntity)
+    private readonly repository: Repository<UserEntity>,
   ) {}
 
   async getAll(): Promise<User[]> {
-    return this.ormRepository.find({relations: ['role', 'profile', 'driverLicense']});
+    const entities = await this.repository.find({ relations: ['role'] });
+    return entities.map(entity => UserMapper.toDomain(entity));
   }
 
   async getById(id: string): Promise<User | null> {
-    return this.ormRepository.findOne({ where: { id }, relations: ['role', 'profile', 'driverLicense'] });
+    const entity = await this.repository.findOne({ 
+      where: { id },
+      relations: ['role']
+    });
+    return entity ? UserMapper.toDomain(entity) : null;
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return this.ormRepository.findOne({ where: { email } });
+  async findByEmail(email: Email): Promise<User | null> {
+    const entity = await this.repository.findOne({
+      where: { email: email.getValue() },
+      relations: ['role']
+    });
+    return entity ? UserMapper.toDomain(entity) : null;
   }
 
   async save(user: User): Promise<User> {
-    return this.ormRepository.save(user);
+    const entity = UserMapper.toPersistence(user);
+    const savedEntity = await this.repository.save(entity);
+    return UserMapper.toDomain(savedEntity);
   }
 
-  async update(id: string, userData: Partial<User>): Promise<User> {
-    await this.ormRepository.update(id, userData);
-    const updatedUser = await this.getById(id);
-    
-    if (!updatedUser) {
-      throw new Error(`User with id ${id} not found after update`);
+  async update(id: string, user: Partial<User>): Promise<User> {
+    await this.repository.update(id, UserMapper.toPersistence(user as User));
+    const updatedEntity = await this.repository.findOne({ 
+      where: { id },
+      relations: ['role']
+    });
+    if (!updatedEntity) {
+      throw new Error('User not found after update');
     }
-    
-    return updatedUser;
+    return UserMapper.toDomain(updatedEntity);
   }
 
   async delete(id: string): Promise<void> {
-    await this.ormRepository.delete(id);
+    await this.repository.delete(id);
   }
 }

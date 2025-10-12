@@ -1,6 +1,6 @@
 import { UserResponseDto, UpdateUserDto, UserProfileResponseDto, UpdateProfileDto } from '@carsharing/common';
 
-export interface IUsersService {
+export interface IUserService {
   getUserById(id: string): Promise<UserResponseDto>;
   getUserByEmail(email: string): Promise<UserResponseDto | null>;
   updateUser(userId: string, dto: UpdateUserDto): Promise<UserResponseDto>;
