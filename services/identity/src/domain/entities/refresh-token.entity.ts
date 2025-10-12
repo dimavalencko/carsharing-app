@@ -1,69 +1,31 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { User } from './user.entity';
+import { PasswordHash } from "../value-objects/password-hash.vo";
 
-@Entity('RefreshTokens')
 export class RefreshToken {
-  @PrimaryGeneratedColumn()
-  id: number;
+  constructor(
+    private readonly _id: string,
+    private readonly _userId: string,
+    private _tokenHash: PasswordHash,
+    private _expiresAt: Date,
+    private _userAgent: string | null = null,
+    private _ipAddress: string | null = null,
+    private _isRevoked: boolean = false,
+    private readonly _createdAt: Date = new Date(),
+  ) {}
 
-  @Column({ name: 'token_hash', type: 'varchar', length: 255 })
-  tokenHash: string;
+  get id(): string { return this._id; }
+  get userId(): string { return this._userId; }
+  get tokenHash(): PasswordHash { return this._tokenHash; }
+  get expiresAt(): Date { return this._expiresAt; }
+  get userAgent(): string | null { return this._userAgent; }
+  get ipAddress(): string | null { return this._ipAddress; }
+  get isRevoked(): boolean { return this._isRevoked; }
+  get createdAt(): Date { return this._createdAt; }
 
-  @Column({ name: 'expires_at' })
-  expiresAt: Date;
-
-  @Column({ default: false })
- revoked: boolean;
-
-  @Column({ name: 'user_agent', type: 'varchar', length: 500, nullable: true })
-  userAgent: string | null = null;
-
-  @Column({ name: 'ip_address', type: 'varchar', length: 45, nullable: true })
-  ipAddress: string | null = null;
-
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
-
-  // Relation - для TypeORM
-  @ManyToOne(() => User, user => user.refreshTokens, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
-  user: User;
-
-  // Бизнес-логика
-  public revoke(): void {
-    this.revoked = true;
+  revoke(): void {
+    this._isRevoked = true;
   }
 
-  public isExpired(): boolean {
-    return this.expiresAt < new Date();
-  }
-
-  public isValid(): boolean {
-    return !this.revoked && !this.isExpired();
-  }
-
-  public setUser(user: User): void {
-    this.user = user;
-  }
-
-  // Фабричный метод
-  public static create(
-    tokenHash: string,
-    expiresAt: Date,
-    user: User,
-    userAgent?: string,
-    ipAddress?: string
-  ): RefreshToken {
-    const refreshToken = new RefreshToken();
-    refreshToken.tokenHash = tokenHash;
-    refreshToken.expiresAt = expiresAt;
-    refreshToken.user = user;
-    refreshToken.userAgent = userAgent || null;
-    refreshToken.ipAddress = ipAddress || null;
-    
-    return refreshToken;
+  isValid(): boolean {
+    return !this._isRevoked && new Date() < this._expiresAt;
   }
 }
