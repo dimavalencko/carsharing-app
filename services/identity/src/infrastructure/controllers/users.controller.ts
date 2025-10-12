@@ -1,100 +1,81 @@
-import { Controller, Param } from '@nestjs/common';
-import { UsersService } from '@infrastructure/services/users.service';
-import { CreateUserDto } from '@app/dto/user/create-user.dto';
-import { UpdateUserDto } from '@app/dto/user/update-user.dto';
-import { User } from '@domain/entities/user.entity';
+import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { IdentityEndpoints } from '@carsharing/common';
-
-@Controller('users')
+import { UserService } from '../services/user.service';
+import { IdentityEndpoints, UpdateUserDto, UpdateProfileDto } from '@carsharing/common';
+@Controller()
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
-
-  @MessagePattern(IdentityEndpoints.USERS.GET_ALL)
-  async getAll(): Promise<Array<Omit<User, 'passwordHash' | 'refreshToken'>>> {
-    const users = await this.usersService.getAll();
-    return users.map(user => this.sanitizeUser(user));
-  }
+  constructor(private readonly userService: UserService) {}
 
   @MessagePattern(IdentityEndpoints.USERS.GET_BY_ID)
-  async findOne(@Payload() id: string): Promise<Omit<User, 'passwordHash' | 'refreshToken'> | null> {
-    console.log('---PAYLOAD DATA---', id);
-    if(id == null) return null;
-    const user = await this.usersService.getById(id);
-    return user ? this.sanitizeUser(user) : null;
-  }
-
-
-  @MessagePattern(IdentityEndpoints.USERS.GET_BY_ID)
-  async getUserById(@Payload() data: any): Promise<User | null> {
-    console.log('---PAYLOAD DATA---', data);
-    console.log('---PAYLOAD TYPE---', typeof data);
-    console.log('---PIDOR TYPE---', typeof data);
-    if(data === null || data === undefined) { 
-      return null;
+  async getUserById(@Payload() data: { id: string }) {
+    try {
+      return await this.userService.getUserById(data.id);
+    } catch (error) {
+      return {
+        error: error.message,
+        statusCode: error.status || 500
+      };
     }
-
-    const user = await this.usersService.getById(data);
-    return this.sanitizeUser(user);
   }
 
-
-  @MessagePattern({ cmd: IdentityEndpoints.USERS.CREATE })
-  async create(@Payload() createUserDto: CreateUserDto): Promise<Omit<User, 'passwordHash' | 'refreshToken'>> {
-    const user = await this.usersService.create(createUserDto);
-    return this.sanitizeUser(user);
+  @MessagePattern(IdentityEndpoints.USERS.GET_BY_EMAIL)
+  async getUserByEmail(@Payload() data: { email: string }) {
+    try {
+      return await this.userService.getUserByEmail(data.email);
+    } catch (error) {
+      return {
+        error: error.message,
+        statusCode: error.status || 500
+      };
+    }
   }
 
   @MessagePattern(IdentityEndpoints.USERS.UPDATE)
-  async update(@Payload() data: { id: string; updateUserDto: UpdateUserDto }): Promise<Omit<User, 'passwordHash' | 'refreshToken'>> {
-    const user = await this.usersService.update(data.id, data.updateUserDto);
-    return this.sanitizeUser(user);
+  async updateUser(@Payload() data: { userId: string; dto: UpdateUserDto }) {
+    try {
+      return await this.userService.updateUser(data.userId, data.dto);
+    } catch (error) {
+      return {
+        error: error.message,
+        statusCode: error.status || 500
+      };
+    }
   }
-  
+
   @MessagePattern(IdentityEndpoints.USERS.DELETE)
-  async remove(@Payload() data: { id: string }): Promise<void> {
-    return this.usersService.delete(data.id);
+  async deleteUser(@Payload() data: { userId: string }) {
+    try {
+      await this.userService.deleteUser(data.userId);
+      return { success: true };
+    } catch (error) {
+      return {
+        error: error.message,
+        statusCode: error.status || 500
+      };
+    }
   }
 
-  async activate(@Param('id') id: string): Promise<Omit<User, 'passwordHash' | 'refreshToken'>> {
-    const user = await this.usersService.activateUser(id);
-    return this.sanitizeUser(user);
+  @MessagePattern(IdentityEndpoints.USERS.GET_PROFILE)
+  async getUserProfile(@Payload() data: { userId: string }) {
+    try {
+      return await this.userService.getUserProfile(data.userId);
+    } catch (error) {
+      return {
+        error: error.message,
+        statusCode: error.status || 500
+      };
+    }
   }
 
-  async deactivate(@Param('id') id: string): Promise<Omit<User, 'passwordHash' | 'refreshToken'>> {
-    const user = await this.usersService.deactivateUser(id);
-    return this.sanitizeUser(user);
-  }
-
-  private sanitizeUser(user: User): any {
-    return {
-      id: user.id,
-      email: user.email,
-      phone: user.phone,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      profile: user.profile ? {
-        firstName: user.profile.firstName,
-        lastName: user.profile.lastName,
-        patronymic: user.profile.patronymic,
-        profilePicture: user.profile.profilePicture,
-        fullName: user.profile.getFullName()
-      } : null,
-      driverLicense: user.driverLicense ? {
-        licenseNumber: user.driverLicense.licenseNumber,
-        firstName: user.driverLicense.firstName,
-        lastName: user.driverLicense.lastName,
-        patronymic: user.driverLicense.patronymic,
-        birthDate: user.driverLicense.birthDate,
-        issueDate: user.driverLicense.issueDate,
-        expirationDate: user.driverLicense.expirationDate,
-        isExpired: user.driverLicense.isExpired(),
-        fullName: user.driverLicense.getFullName()
-      } : null,
-      role: user.role ? {
-        id: user.role.id,
-        name: user.role.name
-      } : null,
-    };
+  @MessagePattern(IdentityEndpoints.USERS.UPDATE_PROFILE)
+  async updateUserProfile(@Payload() data: { userId: string; dto: UpdateProfileDto }) {
+    try {
+      return await this.userService.updateUserProfile(data.userId, data.dto);
+    } catch (error) {
+      return {
+        error: error.message,
+        statusCode: error.status || 500
+      };
+    }
   }
 }

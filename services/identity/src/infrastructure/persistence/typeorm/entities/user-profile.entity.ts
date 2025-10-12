@@ -13,12 +13,11 @@ export class UserProfileEntity {
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   profilePicture: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   city: string;
-
   @CreateDateColumn()
   createdAt: Date;
 

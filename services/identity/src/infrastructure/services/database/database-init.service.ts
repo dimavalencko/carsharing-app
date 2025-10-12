@@ -22,6 +22,19 @@ export class DatabaseInitService implements OnApplicationBootstrap {
     this.logger.log('onApplicationBootstrap called');
     
     try {
+      console.log('🔍 Checking DataSource initialization...');
+      console.log('🔍 DataSource isInitialized:', this.dataSource.isInitialized);
+      
+      // Если DataSource не инициализирована - инициализируем
+      if (!this.dataSource.isInitialized) {
+        console.log('🔍 Initializing DataSource...');
+        await this.dataSource.initialize();
+        console.log('🔍 DataSource initialized:', this.dataSource.isInitialized);
+      }
+
+      // Проверяем metadata после инициализации
+      const entities = this.dataSource.entityMetadatas;
+      console.log('🔍 Available entities after initialization:', entities.map(e => e.name));
       // Проверяем соединение
       await this.dataSource.query('SELECT 1');
       this.logger.log('✅ Database connection established');
@@ -31,6 +44,7 @@ export class DatabaseInitService implements OnApplicationBootstrap {
       
       // Засеивание данных
       await this.seedData();
+      this.logger.log('✅ Data seeding completed');
       
       this.logger.log('✅ Database initialization completed');
     } catch (error) {

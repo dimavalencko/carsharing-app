@@ -19,10 +19,10 @@ export class RefreshTokenEntity {
   @Column()
   expiresAt: Date;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   userAgent: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   ipAddress: string;
 
   @Column({ default: false })
