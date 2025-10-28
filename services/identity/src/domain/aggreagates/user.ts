@@ -13,10 +13,18 @@ export class UserAggregate {
   getUser(): User { return this.user; }
   getDriverLicense(): DriverLicense | undefined { return this.driverLicense; }
 
+  hasDriverLicense(): boolean {
+    return !!this.driverLicense;
+  }
+  
   addDriverLicense(driverLicense: DriverLicense): void {
     if (driverLicense.getUserId() !== this.user.getId()) {
       throw new Error('Driver license does not belong to this user');
     }
+    if (this.driverLicense) {
+      throw new Error('User already has driver license');
+    }
+
     this.driverLicense = driverLicense;
   }
 
@@ -24,9 +32,6 @@ export class UserAggregate {
     this.driverLicense = undefined;
   }
 
-  hasDriverLicense(): boolean {
-    return !!this.driverLicense;
-  }
 
   getFullName(): string {
     const parts = [
