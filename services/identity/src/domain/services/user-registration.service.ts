@@ -38,4 +38,31 @@ export class UserRegistrationService {
 
     return userAggregate;
   }
+
+  async createAdminUser(command: {
+    login: string;
+    password: string;
+    firstName: string;
+    lastName?: string;
+    middleName?: string;
+  }) {
+    if (await this.userRepository.existsByLogin(command.login)) {
+      throw new Error('User with this login already exists');
+    }
+
+    const passwordHash = await this.passwordHasher.hash(command.password);
+
+    const user = User.createAdmin({
+      login: LoginValue.create(command.login),
+      password: PasswordValue.create(passwordHash),
+      firstName: command.firstName,
+      lastName: command.lastName,
+      middleName: command.middleName
+    });
+    
+    const userAggregate = UserAggregate.create(user);
+    await this.userRepository.save(userAggregate);
+
+    return userAggregate;
+  }
 }
