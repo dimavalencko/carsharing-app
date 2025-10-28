@@ -1,4 +1,4 @@
-import { UserAggregate } from "../aggreagates/user";
+import { UserAggregate } from "../aggregates/user";
 import { User } from "../entities";
 import { IUserRepository } from "../interfaces/repositories";
 import { IPasswordHasher } from "../interfaces/services";
