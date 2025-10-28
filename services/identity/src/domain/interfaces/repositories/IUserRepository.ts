@@ -1,11 +1,11 @@
-import { Email } from '@/domain/value-objects/email.vo';
-import { User } from '@domain/entities/user.entity';
+import { UserAggregate } from '@/domain/aggreagates/user';
 
 export interface IUserRepository {
-  getAll(): Promise<User[]>;
-  getById(id: string): Promise<User | null>;
-  findByEmail(email: Email): Promise<User | null>;
-  save(user: User): Promise<User>;
-  update(id: string, user: Partial<User>): Promise<User>;
+  findById(id: string): Promise<UserAggregate | null>;
+  findByLogin(login: string): Promise<UserAggregate | null>;
+  findByEmail(email: string): Promise<UserAggregate | null>;
+  save(userAggregate: UserAggregate): Promise<void>;
   delete(id: string): Promise<void>;
+  existsByLogin(login: string): Promise<boolean>;
+  existsByEmail(email: string): Promise<boolean>;
 }

@@ -1,4 +1,3 @@
-// src/infrastructure/modules/admin.module.ts
 import { AdminController } from '@/infrastructure/controllers/admin.controller';
 import { UserEntity, UserProfileEntity, DriverLicenseEntity, RefreshTokenEntity, UserRoleEntity } from '@/infrastructure/persistence/typeorm';
 import { DriverLicenseRepository } from '@/infrastructure/repositories/driver-license.repository';

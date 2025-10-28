@@ -1,4 +1,5 @@
-export class Email {
+// value-object для валидации почты
+export class EmailValue {
   constructor(private readonly value: string) {
     if (!this.isValidEmail(value)) {
       throw new Error('Invalid email format');
@@ -14,7 +15,7 @@ export class Email {
     return this.value;
   }
 
-  equals(other: Email): boolean {
+  equals(other: EmailValue): boolean {
     return this.value === other.getValue();
   }
 }

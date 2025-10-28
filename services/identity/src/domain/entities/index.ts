@@ -1,5 +1,3 @@
-export { User } from './user.entity'
-export { UserRole } from './role.entity'
-export { DriverLicense } from './driver-license.entity'
-export { UserProfile } from './profile.entity'
-export { RefreshToken } from './refresh-token.entity'
+export { DriverLicense } from './driver-license.entity';
+export { RefreshToken } from './refresh-token.entity';
+export { User } from './user.entity';

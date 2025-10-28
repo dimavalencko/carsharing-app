@@ -1,30 +1,73 @@
+import { DriverLicenseNumberValue } from "../value-objects";
+
+export interface DriverLicenseProps {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  birthDate: Date;
+  birthPlace: string;
+  issueDate: Date;
+  expiryDate: Date;
+  issuedBy: string;
+  licenseNumber: DriverLicenseNumberValue;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export class DriverLicense {
-  constructor(
-    private readonly _id: string,
-    private readonly _userId: string,
-    private _licenseNumber: string,
-    private _issueDate: Date,
-    private _expirationDate: Date,
-    private readonly _createdAt: Date = new Date(),
-    private _updatedAt: Date = new Date(),
+  private constructor(
+    private readonly id: string,
+    private props: DriverLicenseProps
   ) {}
 
-  get id(): string { return this._id; }
-  get userId(): string { return this._userId; }
-  get licenseNumber(): string { return this._licenseNumber; }
-  get issueDate(): Date { return this._issueDate; }
-  get expirationDate(): Date { return this._expirationDate; }
-  get createdAt(): Date { return this._createdAt; }
-  get updatedAt(): Date { return this._updatedAt; }
+  static create(props: Omit<DriverLicenseProps, 'createdAt' | 'updatedAt'>, id?: string): DriverLicense {
+    const now = new Date();
+    
+    if (props.issueDate >= props.expiryDate) {
+      throw new Error('Issue date must be before expiry date');
+    }
+    
+    if (props.expiryDate <= new Date()) {
+      throw new Error('Driver license has expired');
+    }
 
-  updateLicenseInfo(licenseNumber: string, issueDate: Date, expirationDate: Date): void {
-    this._licenseNumber = licenseNumber;
-    this._issueDate = issueDate;
-    this._expirationDate = expirationDate;
-    this._updatedAt = new Date();
+    return new DriverLicense(id || this.generateId(), {
+      ...props,
+      createdAt: now,
+      updatedAt: now
+    });
+  }
+
+  private static generateId(): string {
+    return Math.random().toString(36).substr(2, 9);
+  }
+
+  getId(): string { return this.id; }
+  getUserId(): string { return this.props.userId; }
+  getFirstName(): string { return this.props.firstName; }
+  getLastName(): string { return this.props.lastName; }
+  getMiddleName(): string | undefined { return this.props.middleName; }
+  getBirthDate(): Date { return this.props.birthDate; }
+  getBirthPlace(): string { return this.props.birthPlace; }
+  getIssueDate(): Date { return this.props.issueDate; }
+  getExpiryDate(): Date { return this.props.expiryDate; }
+  getIssuedBy(): string { return this.props.issuedBy; }
+  getLicenseNumber(): DriverLicenseNumberValue { return this.props.licenseNumber; }
+  getCreatedAt(): Date { return this.props.createdAt; }
+  getUpdatedAt(): Date { return this.props.updatedAt; }
+
+  updateInfo(updateData: Partial<Pick<DriverLicenseProps, 
+    'firstName' | 'lastName' | 'middleName' | 'birthPlace' | 'issuedBy'
+  >>): void {
+    this.props = {
+      ...this.props,
+      ...updateData,
+      updatedAt: new Date()
+    };
   }
 
   isExpired(): boolean {
-    return new Date() > this._expirationDate;
+    return this.props.expiryDate <= new Date();
   }
 }
