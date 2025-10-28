@@ -1,4 +1,4 @@
-export * from './acess-token.vo';
+export * from './access-token.vo';
 export * from './driver-license-number.vo';
 export * from './email.vo';
 export * from './jwt-payload.vo';
