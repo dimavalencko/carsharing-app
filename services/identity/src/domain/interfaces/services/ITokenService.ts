@@ -1,17 +1,15 @@
-export interface JwtPayload {
-  sub: string;
-  email: string;
-  role: string;
-  hasDriverLicense: boolean;
-}
+import { UserRoles } from "@carsharing/common";
+import { AccessTokenValue, JwtPayloadValue, RefreshTokenValue } from "@/domain/value-objects";
 
 export interface ITokenService {
-  generateAccessToken(payload: JwtPayload): string;
-  generateRefreshToken(): string;
-  
-  verifyAccessToken(token: string): JwtPayload;
-  verifyRefreshToken(token: string): boolean;
-  
-  decodeToken(token: string): JwtPayload | null;
-  getTokenExpiration(token: string): Date | null;
+  generateTokenPair(payload: { 
+    userId: string; 
+    login: string; 
+    role: UserRoles 
+  }): Promise<{
+    accessToken: AccessTokenValue;
+    refreshToken: RefreshTokenValue;
+  }>;
+  verifyAccessToken(token: string): Promise<JwtPayloadValue>;
+  verifyRefreshToken(token: string): Promise<JwtPayloadValue>;
 }

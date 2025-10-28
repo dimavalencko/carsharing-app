@@ -1,63 +1,84 @@
-import { Email } from "../value-objects/email.vo";
-import { PasswordHash } from "../value-objects/password-hash.vo";
+import { PhoneNumberValue, LoginValue, PasswordValue, EmailValue } from "../value-objects";
+import { UserRoles } from "@carsharing/common";
+
+export interface UserProps {
+  login: LoginValue;
+  password: PasswordValue;
+  firstName: string;
+  lastName?: string;
+  middleName?: string;
+  email?: EmailValue;
+  phoneNumber?: PhoneNumberValue;
+  birthDate?: Date;
+  city?: string;
+  avatarUrl?: string;
+  role: UserRoles;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export class User {
-  constructor(
-    private readonly _id: string,
-    private _email: Email,
-    private _passwordHash: PasswordHash,
-    private _firstName: string,
-    private _lastName: string,
-    private _dateOfBirth: Date,
-    private _roleId: string,
-    private _phone: string | null = null,
-    private _patronymic: string | null = null,
-    private _lastLoginAt: Date | null = null,
-    private readonly _createdAt: Date = new Date(),
-    private _updatedAt: Date = new Date(),
+  private constructor(
+    private readonly id: string,
+    private props: UserProps
   ) {}
 
-  get id(): string { return this._id; }
-  get email(): Email { return this._email; }
-  get passwordHash(): PasswordHash { return this._passwordHash; }
-  get firstName(): string { return this._firstName; }
-  get lastName(): string { return this._lastName; }
-  get dateOfBirth(): Date { return this._dateOfBirth; }
-  get roleId(): string { return this._roleId; }
-  get phone(): string | null { return this._phone; }
-  get patronymic(): string | null { return this._patronymic; }
-  get lastLoginAt(): Date | null { return this._lastLoginAt; }
-  get createdAt(): Date { return this._createdAt; }
-  get updatedAt(): Date { return this._updatedAt; }
-
-  set phone(value: string | null) {
-    this._phone = value;
-    this._updatedAt = new Date();
-  }
-  set patronymic(value: string | null) {
-    this._patronymic = value;
-    this._updatedAt = new Date();
+  static create(props: Omit<UserProps, 'createdAt' | 'updatedAt' | 'role'>, id?: string): User {
+    const now = new Date();
+    return new User(id || this.generateId(), {
+      ...props,
+      role: UserRoles.User,
+      createdAt: now,
+      updatedAt: now
+    });
   }
 
-  // Business methods
-  updatePersonalInfo(firstName: string, lastName: string, dateOfBirth: Date): void {
-    this._firstName = firstName;
-    this._lastName = lastName;
-    this._dateOfBirth = dateOfBirth;
-    this._updatedAt = new Date();
+  static createAdmin(props: Omit<UserProps, 'createdAt' | 'updatedAt' | 'role'>, id?: string): User {
+    const now = new Date();
+    return new User(id || this.generateId(), {
+      ...props,
+      role: UserRoles.Admin,
+      createdAt: now,
+      updatedAt: now
+    });
   }
 
-  changeEmail(email: Email): void {
-    this._email = email;
-    this._updatedAt = new Date();
+  private static generateId(): string {
+    return Math.random().toString(36).substr(2, 9);
   }
 
-  changePassword(passwordHash: PasswordHash): void {
-    this._passwordHash = passwordHash;
-    this._updatedAt = new Date();
+  getId(): string { return this.id; }
+  getLogin(): LoginValue { return this.props.login; }
+  getPassword(): PasswordValue { return this.props.password; }
+  getFirstName(): string { return this.props.firstName; }
+  getLastName(): string | undefined { return this.props.lastName; }
+  getMiddleName(): string | undefined { return this.props.middleName; }
+  getEmail(): EmailValue | undefined { return this.props.email; }
+  getPhoneNumber(): PhoneNumberValue | undefined { return this.props.phoneNumber; }
+  getBirthDate(): Date | undefined { return this.props.birthDate; }
+  getCity(): string | undefined { return this.props.city; }
+  getAvatarUrl(): string | undefined { return this.props.avatarUrl; }
+  getRole(): UserRoles { return this.props.role; }
+  getCreatedAt(): Date { return this.props.createdAt; }
+  getUpdatedAt(): Date { return this.props.updatedAt; }
+
+
+  updateProfile(profileData: Partial<Pick<UserProps, 
+    'lastName' | 'middleName' | 'email' | 'phoneNumber' | 'birthDate' | 'city' | 'avatarUrl'
+  >>): void {
+    this.props = {
+      ...this.props,
+      ...profileData,
+      updatedAt: new Date()
+    };
   }
 
-  markAsLoggedIn(): void {
-    this._lastLoginAt = new Date();
+  changePassword(newPassword: PasswordValue): void {
+    this.props.password = newPassword;
+    this.props.updatedAt = new Date();
+  }
+
+  isAdministrator(): boolean {
+    return this.props.role === UserRoles.Admin;
   }
 }

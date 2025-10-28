@@ -1,11 +1,10 @@
 import { RefreshToken } from "@/domain/entities";
-import { PasswordHash } from "@/domain/value-objects/password-hash.vo";
 
 export interface IRefreshTokenRepository {
-  findByTokenHash(tokenHash: PasswordHash): Promise<RefreshToken | null>;
+  findByToken(token: string): Promise<RefreshToken | null>;
   findByUserId(userId: string): Promise<RefreshToken[]>;
-  save(token: RefreshToken): Promise<RefreshToken>;
-  delete(id: string): Promise<void>;
-  revokeAllForUser(userId: string): Promise<void>;
-  deleteExpired(): Promise<void>;
+  save(refreshToken: RefreshToken): Promise<void>;
+  revokeByUserId(userId: string): Promise<void>;
+  revokeByToken(token: string): Promise<void>;
+  deleteExpiredTokens(): Promise<void>;
 }

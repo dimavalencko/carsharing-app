@@ -1,31 +1,48 @@
-import { PasswordHash } from "../value-objects/password-hash.vo";
+export interface RefreshTokenProps {
+  userId: string;
+  token: string;
+  expiresAt: Date;
+  createdAt: Date;
+  revokedAt?: Date;
+}
 
 export class RefreshToken {
-  constructor(
-    private readonly _id: string,
-    private readonly _userId: string,
-    private _tokenHash: PasswordHash,
-    private _expiresAt: Date,
-    private _userAgent: string | null = null,
-    private _ipAddress: string | null = null,
-    private _isRevoked: boolean = false,
-    private readonly _createdAt: Date = new Date(),
+  private constructor(
+    private readonly id: string,
+    private props: RefreshTokenProps
   ) {}
 
-  get id(): string { return this._id; }
-  get userId(): string { return this._userId; }
-  get tokenHash(): PasswordHash { return this._tokenHash; }
-  get expiresAt(): Date { return this._expiresAt; }
-  get userAgent(): string | null { return this._userAgent; }
-  get ipAddress(): string | null { return this._ipAddress; }
-  get isRevoked(): boolean { return this._isRevoked; }
-  get createdAt(): Date { return this._createdAt; }
+  static create(props: Omit<RefreshTokenProps, 'createdAt'>, id?: string): RefreshToken {
+    return new RefreshToken(id || this.generateId(), {
+      ...props,
+      createdAt: new Date()
+    });
+  }
+
+  private static generateId(): string {
+    return Math.random().toString(36).substr(2, 9);
+  }
+
+  getId(): string { return this.id; }
+  getUserId(): string { return this.props.userId; }
+  getToken(): string { return this.props.token; }
+  getExpiresAt(): Date { return this.props.expiresAt; }
+  getCreatedAt(): Date { return this.props.createdAt; }
+  getRevokedAt(): Date | undefined { return this.props.revokedAt; }
 
   revoke(): void {
-    this._isRevoked = true;
+    this.props.revokedAt = new Date();
+  }
+
+  isRevoked(): boolean {
+    return !!this.props.revokedAt;
+  }
+
+  isExpired(): boolean {
+    return this.props.expiresAt < new Date();
   }
 
   isValid(): boolean {
-    return !this._isRevoked && new Date() < this._expiresAt;
+    return !this.isRevoked() && !this.isExpired();
   }
 }
