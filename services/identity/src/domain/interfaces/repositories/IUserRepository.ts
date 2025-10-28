@@ -1,4 +1,4 @@
-import { UserAggregate } from '@/domain/aggreagates/user';
+import { UserAggregate } from '@/domain/aggregates/user';
 
 export interface IUserRepository {
   findById(id: string): Promise<UserAggregate | null>;

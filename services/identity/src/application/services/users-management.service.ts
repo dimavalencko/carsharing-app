@@ -1,4 +1,4 @@
-import { UserAggregate } from "@/domain/aggreagates/user";
+import { UserAggregate } from "@/domain/aggregates/user";
 import { UserMapper } from "@/infrastructure/persistence/typeorm";
 import { CreateUserDto } from "@carsharing/common";
 
