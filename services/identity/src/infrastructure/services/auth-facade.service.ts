@@ -1,8 +1,14 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { v4 as uuid } from 'uuid';
-import type { IUserRepository, IRefreshTokenRepository } from '@/domain/interfaces/repositories';
-import type { IPasswordHasher, ITokenService } from '@/domain/interfaces/services';
-import { LoginValue, PasswordValue, RefreshTokenValue } from '@/domain/value-objects';
+import type {
+  IUserRepository,
+  IRefreshTokenRepository,
+} from '@/domain/interfaces/repositories';
+import type {
+  IPasswordHasher,
+  ITokenService,
+} from '@/domain/interfaces/services';
+import { LoginValue, PasswordValue } from '@/domain/value-objects';
 import { User } from '@/domain/entities/user.entity';
 import { UserAggregate } from '@/domain/aggregates/user';
 
@@ -10,22 +16,31 @@ import { UserAggregate } from '@/domain/aggregates/user';
 export class AuthFacadeService {
   constructor(
     @Inject('IUserRepository') private readonly users: IUserRepository,
-    @Inject('IRefreshTokenRepository') private readonly refreshTokens: IRefreshTokenRepository,
+    @Inject('IRefreshTokenRepository')
+    private readonly refreshTokens: IRefreshTokenRepository,
     @Inject('IPasswordHasher') private readonly passwordHasher: IPasswordHasher,
     @Inject('ITokenService') private readonly tokenService: ITokenService,
   ) {}
 
-  async register(dto: { login: string; password: string; firstName: string; lastName?: string }) {
+  async register(dto: {
+    login: string;
+    password: string;
+    firstName: string;
+    lastName?: string;
+  }) {
     if (await this.users.existsByLogin(dto.login)) {
       throw new Error('Login already in use');
     }
     const hashed = await this.passwordHasher.hash(dto.password);
-    const user = User.create({
-      login: LoginValue.create(dto.login),
-      password: PasswordValue.create(hashed),
-      firstName: dto.firstName,
-      lastName: dto.lastName,
-    }, uuid());
+    const user = User.create(
+      {
+        login: LoginValue.create(dto.login),
+        password: PasswordValue.create(hashed),
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+      },
+      uuid(),
+    );
     const aggregate = UserAggregate.create(user);
     await this.users.save(aggregate);
 
@@ -48,7 +63,7 @@ export class AuthFacadeService {
 
     const ok = await this.passwordHasher.compare(
       dto.password,
-      entity.getPassword().getValue()
+      entity.getPassword().getValue(),
     );
     if (!ok) throw new Error('Invalid credentials');
 
@@ -77,14 +92,17 @@ export class AuthFacadeService {
     };
   }
 
-  async changePassword(userId: string, dto: { oldPassword: string; newPassword: string }) {
+  async changePassword(
+    userId: string,
+    dto: { oldPassword: string; newPassword: string },
+  ) {
     const aggregate = await this.users.findById(userId);
     if (!aggregate) throw new Error('User not found');
     const user = aggregate.getUser();
 
     const match = await this.passwordHasher.compare(
       dto.oldPassword,
-      user.getPassword().getValue()
+      user.getPassword().getValue(),
     );
     if (!match) throw new Error('Old password mismatch');
 
@@ -109,7 +127,10 @@ export class AuthFacadeService {
     const aggregate = await this.users.findByLogin(login);
     if (!aggregate) return null;
     const user = aggregate.getUser();
-    const ok = await this.passwordHasher.compare(password, user.getPassword().getValue());
+    const ok = await this.passwordHasher.compare(
+      password,
+      user.getPassword().getValue(),
+    );
     if (!ok) return null;
     return {
       id: user.getId(),

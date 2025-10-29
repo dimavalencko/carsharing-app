@@ -1,19 +1,19 @@
 import { Controller } from '@nestjs/common';
-import { HealthService } from '../services/health.service';
+import { HealthService, HealthDbStatus } from '../services/health.service';
+import type { HealthStatus } from '../services/health.service';
 import { MessagePattern } from '@nestjs/microservices';
 
 @Controller('health')
 export class HealthController {
-
   constructor(private readonly healthService: HealthService) {}
-  
+
   @MessagePattern('identity.health.check')
-  async checkHealth() {
+  checkHealth(): HealthStatus {
     return this.healthService.checkHealth();
   }
 
   @MessagePattern('identity.health.check_db')
-  async checkDatabase() {
+  checkDatabase(): Promise<HealthDbStatus> {
     return this.healthService.checkDatabase();
   }
 }

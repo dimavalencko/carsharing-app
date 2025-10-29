@@ -1,5 +1,5 @@
-import { DriverLicense } from "@/domain/entities";
-import { IDriverLicenseRepository } from "@/domain/interfaces/repositories";
+import { DriverLicense } from '@/domain/entities';
+import { IDriverLicenseRepository } from '@/domain/interfaces/repositories';
 
 export class GetDriverLicenseByUserIdUseCase {
   constructor(private driverLicenseRepository: IDriverLicenseRepository) {}

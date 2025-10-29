@@ -1,16 +1,15 @@
-import { UserAggregate } from "@/domain/aggregates/user";
-import { IUserRepository } from "@/domain/interfaces/repositories";
-import { IPasswordHasher } from "@/domain/interfaces/services";
-import { 
-  GetUserByIdUseCase, 
+import { IUserRepository } from '@/domain/interfaces/repositories';
+import { IPasswordHasher } from '@/domain/interfaces/services';
+import {
+  GetUserByIdUseCase,
   GetUserByLoginUseCase,
   UpdateUserProfileUseCase,
   ChangeUserPasswordUseCase,
   DeleteUserUseCase,
   UpdateUserProfileDto,
-  ChangeUserPasswordDto
-} from "../use-cases/users";
-import { UserMapper, UserResponseDto } from "../mappers";
+  ChangeUserPasswordDto,
+} from '../use-cases/users';
+import { UserMapper, UserResponseDto } from '../mappers';
 
 export class UsersManagementService {
   private getUserByIdUseCase: GetUserByIdUseCase;
@@ -21,14 +20,16 @@ export class UsersManagementService {
 
   constructor(
     private userRepository: IUserRepository,
-    private passwordHasher: IPasswordHasher
+    private passwordHasher: IPasswordHasher,
   ) {
     this.getUserByIdUseCase = new GetUserByIdUseCase(userRepository);
     this.getUserByLoginUseCase = new GetUserByLoginUseCase(userRepository);
-    this.updateUserProfileUseCase = new UpdateUserProfileUseCase(userRepository);
+    this.updateUserProfileUseCase = new UpdateUserProfileUseCase(
+      userRepository,
+    );
     this.changeUserPasswordUseCase = new ChangeUserPasswordUseCase(
-      userRepository, 
-      passwordHasher
+      userRepository,
+      passwordHasher,
     );
     this.deleteUserUseCase = new DeleteUserUseCase(userRepository);
   }
@@ -44,16 +45,19 @@ export class UsersManagementService {
   }
 
   async updateUserProfile(
-    userId: string, 
-    dto: UpdateUserProfileDto
+    userId: string,
+    dto: UpdateUserProfileDto,
   ): Promise<UserResponseDto> {
-    const userAggregate = await this.updateUserProfileUseCase.execute(userId, dto);
+    const userAggregate = await this.updateUserProfileUseCase.execute(
+      userId,
+      dto,
+    );
     return UserMapper.toResponseDto(userAggregate);
   }
 
   async changeUserPassword(
-    userId: string, 
-    dto: ChangeUserPasswordDto
+    userId: string,
+    dto: ChangeUserPasswordDto,
   ): Promise<void> {
     await this.changeUserPasswordUseCase.execute(userId, dto);
   }

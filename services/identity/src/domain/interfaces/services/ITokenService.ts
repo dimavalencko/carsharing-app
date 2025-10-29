@@ -1,10 +1,14 @@
-import { AccessTokenValue, JwtPayloadValue, RefreshTokenValue } from "@/domain/value-objects";
+import {
+  AccessTokenValue,
+  JwtPayloadValue,
+  RefreshTokenValue,
+} from '@/domain/value-objects';
 
 export interface ITokenService {
-  generateTokenPair(payload: { 
-    userId: string; 
-    login: string; 
-    role: string 
+  generateTokenPair(payload: {
+    userId: string;
+    login: string;
+    role: string;
   }): Promise<{
     accessToken: AccessTokenValue;
     refreshToken: RefreshTokenValue;

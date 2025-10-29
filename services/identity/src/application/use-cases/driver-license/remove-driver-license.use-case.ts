@@ -1,14 +1,17 @@
-import { IDriverLicenseRepository, IUserRepository } from "@/domain/interfaces/repositories";
+import {
+  IDriverLicenseRepository,
+  IUserRepository,
+} from '@/domain/interfaces/repositories';
 
 export class RemoveDriverLicenseUseCase {
   constructor(
     private userRepository: IUserRepository,
-    private driverLicenseRepository: IDriverLicenseRepository
+    private driverLicenseRepository: IDriverLicenseRepository,
   ) {}
 
   async execute(userId: string): Promise<void> {
     const userAggregate = await this.userRepository.findById(userId);
-    
+
     if (!userAggregate) {
       throw new Error('User not found');
     }

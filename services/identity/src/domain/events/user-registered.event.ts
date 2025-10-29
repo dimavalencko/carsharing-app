@@ -5,7 +5,7 @@ export class UserRegisteredEvent extends DomainEvent {
     public readonly userId: string,
     public readonly login: string,
     public readonly firstName: string,
-    public readonly lastName?: string
+    public readonly lastName?: string,
   ) {
     super();
   }

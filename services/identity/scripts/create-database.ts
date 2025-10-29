@@ -1,4 +1,3 @@
-// scripts/create-database.ts
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 import { Logger } from '@nestjs/common';
@@ -17,10 +16,10 @@ export async function createDatabaseIfNotExists() {
   // Создаем DataSource для подключения к системной БД 'postgres'
   const adminDataSource = new DataSource({
     type: 'postgres',
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT ?? '5432', 10),
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '5432', 10),
+    username: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'postgres',
     database: 'postgres',
   });
 
@@ -44,8 +43,7 @@ export async function createDatabaseIfNotExists() {
     }
   } 
   catch (error) {
-    logger.error(`❌ Error creating database '${dbName}':`, error.message);
-    throw error;
+  logger.error(`❌ Error creating database '${dbName}': ${error.message}`);
   } 
   finally {
     // Закрываем соединение с системной БД

@@ -1,4 +1,4 @@
-import { DomainEvent, RefreshTokenRevokedEvent } from "../events";
+import { DomainEvent, RefreshTokenRevokedEvent } from '../events';
 
 export interface RefreshTokenProps {
   userId: string;
@@ -13,13 +13,16 @@ export class RefreshToken {
 
   private constructor(
     private readonly id: string,
-    private props: RefreshTokenProps
-  ) { }
+    private props: RefreshTokenProps,
+  ) {}
 
-  static create(props: Omit<RefreshTokenProps, 'createdAt'>, id: string): RefreshToken {
+  static create(
+    props: Omit<RefreshTokenProps, 'createdAt'>,
+    id: string,
+  ): RefreshToken {
     return new RefreshToken(id, {
       ...props,
-      createdAt: new Date()
+      createdAt: new Date(),
     });
   }
 
@@ -27,12 +30,24 @@ export class RefreshToken {
     return new RefreshToken(id, props);
   }
 
-  getId(): string { return this.id; }
-  getUserId(): string { return this.props.userId; }
-  getToken(): string { return this.props.token; }
-  getExpiresAt(): Date { return this.props.expiresAt; }
-  getCreatedAt(): Date { return this.props.createdAt; }
-  getRevokedAt(): Date | undefined { return this.props.revokedAt; }
+  getId(): string {
+    return this.id;
+  }
+  getUserId(): string {
+    return this.props.userId;
+  }
+  getToken(): string {
+    return this.props.token;
+  }
+  getExpiresAt(): Date {
+    return this.props.expiresAt;
+  }
+  getCreatedAt(): Date {
+    return this.props.createdAt;
+  }
+  getRevokedAt(): Date | undefined {
+    return this.props.revokedAt;
+  }
 
   revoke(): void {
     if (this.props.revokedAt) {
@@ -40,7 +55,7 @@ export class RefreshToken {
     }
     this.props.revokedAt = new Date();
     this.addDomainEvent(
-      new RefreshTokenRevokedEvent(this.id, this.props.userId)
+      new RefreshTokenRevokedEvent(this.id, this.props.userId),
     );
   }
 

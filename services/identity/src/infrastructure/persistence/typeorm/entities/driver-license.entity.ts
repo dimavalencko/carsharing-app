@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryColumn, OneToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryColumn,
+  OneToOne,
+  JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { UserEntity } from './user.entity';
 
 @Entity('driver_licenses')
@@ -42,7 +50,7 @@ export class DriverLicenseEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToOne(() => UserEntity, user => user.driverLicense)
+  @OneToOne(() => UserEntity, (user) => user.driverLicense)
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 }

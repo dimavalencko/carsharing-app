@@ -1,6 +1,6 @@
-import { DriverLicense } from "@/domain/entities";
-import { DriverLicenseEntity } from "../entities";
-import { DriverLicenseNumberValue } from "@/domain/value-objects";
+import { DriverLicense } from '@/domain/entities';
+import { DriverLicenseEntity } from '../entities';
+import { DriverLicenseNumberValue } from '@/domain/value-objects';
 
 export class DriverLicenseMapper {
   /**

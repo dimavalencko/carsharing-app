@@ -1,4 +1,4 @@
-import { UserRoles } from "../enums";
+import { UserRoles } from '../enums';
 
 export interface JwtPayload {
   userId: string;
@@ -15,11 +15,21 @@ export class JwtPayloadValue {
     return new JwtPayloadValue(payload);
   }
 
-  getUserId() { return this.payload.userId; }
-  getLogin() { return this.payload.login; }
-  getRole() { return this.payload.role; }
-  getExpiration() { return this.payload.exp; }
-  getIssuedAt() { return this.payload.iat; }
+  getUserId() {
+    return this.payload.userId;
+  }
+  getLogin() {
+    return this.payload.login;
+  }
+  getRole() {
+    return this.payload.role;
+  }
+  getExpiration() {
+    return this.payload.exp;
+  }
+  getIssuedAt() {
+    return this.payload.iat;
+  }
 
   isExpired(): boolean {
     return this.payload.exp ? this.payload.exp < Date.now() / 1000 : true;

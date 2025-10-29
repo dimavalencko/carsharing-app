@@ -1,5 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import { hash as bcryptHash, compare as bcryptCompare } from 'bcrypt';
+// Явные типы для импортированных функций (библиотека уже типизирована, но уточняем для линтера)
+type BcryptHashFn = (
+  data: string | Buffer,
+  saltOrRounds: string | number,
+) => Promise<string>;
+type BcryptCompareFn = (
+  data: string | Buffer,
+  encrypted: string,
+) => Promise<boolean>;
+
+const hashFn: BcryptHashFn = bcryptHash as BcryptHashFn;
+const compareFn: BcryptCompareFn = bcryptCompare as BcryptCompareFn;
 import { IPasswordHasher } from '@/domain/interfaces/services';
 import { ConfigService } from '@nestjs/config';
 
@@ -9,10 +21,12 @@ export class PasswordHasherService implements IPasswordHasher {
 
   async hash(password: string): Promise<string> {
     const rounds = parseInt(this.config.get('BCRYPT_ROUNDS', '10'), 10);
-    return bcrypt.hash(password, rounds);
+    const hashed: string = await hashFn(password, rounds);
+    return hashed;
   }
 
   async compare(plain: string, hash: string): Promise<boolean> {
-    return bcrypt.compare(plain, hash);
+    const isMatch: boolean = await compareFn(plain, hash);
+    return isMatch;
   }
 }

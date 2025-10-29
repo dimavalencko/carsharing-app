@@ -4,7 +4,9 @@ import { DataSource, EntityManager } from 'typeorm';
 export class TransactionManager {
   constructor(private readonly dataSource: DataSource) {}
 
-  async execute<T>(work: (ctx: { manager: EntityManager }) => Promise<T>): Promise<T> {
+  async execute<T>(
+    work: (ctx: { manager: EntityManager }) => Promise<T>,
+  ): Promise<T> {
     return this.dataSource.transaction(async (manager) => {
       return work({ manager });
     });

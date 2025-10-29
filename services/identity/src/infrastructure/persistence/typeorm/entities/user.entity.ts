@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryColumn, CreateDateColumn, UpdateDateColumn, OneToMany, OneToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 import { RefreshTokenEntity } from './refresh-token.entity';
 import { DriverLicenseEntity } from './driver-license.entity';
 
@@ -46,9 +54,11 @@ export class UserEntity {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToOne(() => DriverLicenseEntity, license => license.user, { cascade: true })
+  @OneToOne(() => DriverLicenseEntity, (license) => license.user, {
+    cascade: true,
+  })
   driverLicense?: DriverLicenseEntity;
 
-  @OneToMany(() => RefreshTokenEntity, token => token.user, { cascade: true })
+  @OneToMany(() => RefreshTokenEntity, (token) => token.user, { cascade: true })
   refreshTokens: RefreshTokenEntity[];
 }

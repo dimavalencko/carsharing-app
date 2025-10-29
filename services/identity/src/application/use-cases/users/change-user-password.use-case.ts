@@ -1,6 +1,6 @@
-import { IUserRepository } from "@/domain/interfaces/repositories";
-import { IPasswordHasher } from "@/domain/interfaces/services";
-import { PasswordValue } from "@/domain/value-objects";
+import { IUserRepository } from '@/domain/interfaces/repositories';
+import { IPasswordHasher } from '@/domain/interfaces/services';
+import { PasswordValue } from '@/domain/value-objects';
 
 export interface ChangeUserPasswordDto {
   oldPassword: string;
@@ -10,12 +10,12 @@ export interface ChangeUserPasswordDto {
 export class ChangeUserPasswordUseCase {
   constructor(
     private userRepository: IUserRepository,
-    private passwordHasher: IPasswordHasher
+    private passwordHasher: IPasswordHasher,
   ) {}
 
   async execute(userId: string, dto: ChangeUserPasswordDto): Promise<void> {
     const userAggregate = await this.userRepository.findById(userId);
-    
+
     if (!userAggregate) {
       throw new Error('User not found');
     }
@@ -25,7 +25,7 @@ export class ChangeUserPasswordUseCase {
     // Проверяем старый пароль
     const isOldPasswordValid = await this.passwordHasher.compare(
       dto.oldPassword,
-      user.getPassword().getValue()
+      user.getPassword().getValue(),
     );
 
     if (!isOldPasswordValid) {

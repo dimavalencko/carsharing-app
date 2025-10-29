@@ -1,4 +1,4 @@
-import { DriverLicense } from "@/domain/entities";
+import { DriverLicense } from '@/domain/entities';
 
 export interface IDriverLicenseRepository {
   findById(id: string): Promise<DriverLicense | null>;
