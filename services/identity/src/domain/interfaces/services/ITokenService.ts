@@ -1,11 +1,10 @@
-import { UserRoles } from "@carsharing/common";
 import { AccessTokenValue, JwtPayloadValue, RefreshTokenValue } from "@/domain/value-objects";
 
 export interface ITokenService {
   generateTokenPair(payload: { 
     userId: string; 
     login: string; 
-    role: UserRoles 
+    role: string 
   }): Promise<{
     accessToken: AccessTokenValue;
     refreshToken: RefreshTokenValue;
