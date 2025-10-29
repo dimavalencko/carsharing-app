@@ -1,37 +1,36 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from '@domain/entities/user.entity';
+import { Injectable, Inject } from '@nestjs/common';
+import { DataSource } from 'typeorm';
+import type { IUserRepository } from '@/domain/interfaces/repositories';
 
 @Injectable()
 export class HealthService {
   constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    private readonly dataSource: DataSource,
+    @Inject('IUserRepository') private readonly users: IUserRepository,
   ) {}
 
   async checkHealth() {
     return {
-      status: 'healthy',
+      status: 'ok',
       service: 'identity',
       timestamp: new Date().toISOString(),
     };
   }
 
   async checkDatabase() {
+    const result: any = {
+      timestamp: new Date().toISOString(),
+    };
     try {
-      // Простой запрос для проверки подключения
-      await this.usersRepository.query('SELECT 1');
-      return {
-        database: 'connected',
-        timestamp: new Date().toISOString(),
-      };
-    } catch (error) {
-      return {
-        database: 'disconnected',
-        error: error.message,
-        timestamp: new Date().toISOString(),
-      };
+      await this.dataSource.query('SELECT 1');
+      result.database = 'connected';
+      // Дополнительно можно проверить число пользователей
+      const count = (await this.users.findAll()).length;
+      result.usersCount = count;
+    } catch (e: any) {
+      result.database = 'disconnected';
+      result.error = e.message;
     }
+    return result;
   }
 }
