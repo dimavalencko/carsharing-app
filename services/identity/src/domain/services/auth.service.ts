@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import { RefreshToken, User } from "../entities";
 import { IRefreshTokenRepository, IUserRepository } from "../interfaces/repositories";
 import { IPasswordHasher, ITokenService } from "../interfaces/services";
@@ -84,11 +85,12 @@ export class AuthService {
       role: user.getRole()
     });
 
+    const refreshTokenId = uuidv4();
     const refreshTokenEntity = RefreshToken.create({
       userId: user.getId(),
       token: tokenPair.refreshToken.getValue(),
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-    });
+    }, refreshTokenId);
 
     await this.refreshTokenRepository.save(refreshTokenEntity);
     return tokenPair;
