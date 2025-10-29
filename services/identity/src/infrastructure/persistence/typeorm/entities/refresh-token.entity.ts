@@ -18,8 +18,8 @@ export class RefreshTokenEntity {
   @CreateDateColumn()
   createdAt: Date;
 
-  @Column({ type: 'boolean', default: false })
-  isRevoked: boolean;
+  @Column({ type: 'timestamp', nullable: true })
+  revokedAt?: Date;
 
   @ManyToOne(() => UserEntity, user => user.refreshTokens)
   @JoinColumn({ name: 'userId' })

@@ -1,31 +1,25 @@
-import { RefreshToken } from '@domain/entities';
-import { PasswordHash } from '@domain/value-objects/password-hash.vo';
+import { RefreshToken } from '@/domain/entities/refresh-token.entity';
 import { RefreshTokenEntity } from '../entities/refresh-token.entity';
 
 export class RefreshTokenMapper {
-  static toDomain(entity: RefreshTokenEntity): RefreshToken {
-    return new RefreshToken(
-      entity.id,
-      entity.userId,
-      new PasswordHash(entity.tokenHash),
-      entity.expiresAt,
-      entity.userAgent,
-      entity.ipAddress,
-      entity.isRevoked,
-      entity.createdAt,
-    );
-  }
-
   static toPersistence(token: RefreshToken): RefreshTokenEntity {
     const entity = new RefreshTokenEntity();
-    entity.id = token.id;
-    entity.userId = token.userId;
-    entity.tokenHash = token.tokenHash.getValue();
-    entity.expiresAt = token.expiresAt;
-    entity.userAgent = token.userAgent as string;
-    entity.ipAddress = token.ipAddress as string;
-    entity.isRevoked = token.isRevoked;
-    entity.createdAt = token.createdAt;
+    entity.id = token.getId();
+    entity.userId = token.getUserId();
+    entity.token = token.getToken();
+    entity.expiresAt = token.getExpiresAt();
+    entity.createdAt = token.getCreatedAt();
+    entity.revokedAt = token.getRevokedAt();
     return entity;
+  }
+
+  static toDomain(entity: RefreshTokenEntity): RefreshToken {
+    return RefreshToken.reconstitute(entity.id, {
+      userId: entity.userId,
+      token: entity.token,
+      expiresAt: entity.expiresAt,
+      createdAt: entity.createdAt,
+      revokedAt: entity.revokedAt,
+    });
   }
 }
