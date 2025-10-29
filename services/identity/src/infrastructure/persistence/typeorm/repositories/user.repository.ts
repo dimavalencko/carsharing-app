@@ -10,7 +10,7 @@ export class UserRepository implements IUserRepository {
   async findById(id: string): Promise<UserAggregate | null> {
     const entity = await this.ormRepo.findOne({
       where: { id },
-      relations: { driverLicense: true }
+      relations: { driverLicense: true },
     });
     return entity ? UserMapper.toDomain(entity) : null;
   }
@@ -18,7 +18,7 @@ export class UserRepository implements IUserRepository {
   async findByLogin(login: string): Promise<UserAggregate | null> {
     const entity = await this.ormRepo.findOne({
       where: { login },
-      relations: { driverLicense: true }
+      relations: { driverLicense: true },
     });
     return entity ? UserMapper.toDomain(entity) : null;
   }
@@ -26,16 +26,16 @@ export class UserRepository implements IUserRepository {
   async findByEmail(email: string): Promise<UserAggregate | null> {
     const entity = await this.ormRepo.findOne({
       where: { email },
-      relations: { driverLicense: true }
+      relations: { driverLicense: true },
     });
     return entity ? UserMapper.toDomain(entity) : null;
   }
 
   async findAll(): Promise<UserAggregate[]> {
     const entities = await this.ormRepo.find({
-      relations: { driverLicense: true }
+      relations: { driverLicense: true },
     });
-    return entities.map(e => UserMapper.toDomain(e));
+    return entities.map((e) => UserMapper.toDomain(e));
   }
 
   async existsByLogin(login: string): Promise<boolean> {

@@ -1,19 +1,23 @@
-import { DriverLicense, User } from "../entities";
-import { DomainEvent, DriverLicenseAddedEvent } from "../events";
+import { DriverLicense, User } from '../entities';
+import { DomainEvent, DriverLicenseAddedEvent } from '../events';
 export class UserAggregate {
   private domainEvents: DomainEvent[] = [];
 
   private constructor(
     private user: User,
-    private driverLicense?: DriverLicense
-  ) { }
+    private driverLicense?: DriverLicense,
+  ) {}
 
   static create(user: User, driverLicense?: DriverLicense): UserAggregate {
     return new UserAggregate(user, driverLicense);
   }
 
-  getUser(): User { return this.user; }
-  getDriverLicense(): DriverLicense | undefined { return this.driverLicense; }
+  getUser(): User {
+    return this.user;
+  }
+  getDriverLicense(): DriverLicense | undefined {
+    return this.driverLicense;
+  }
 
   hasDriverLicense(): boolean {
     return !!this.driverLicense;
@@ -32,8 +36,8 @@ export class UserAggregate {
       new DriverLicenseAddedEvent(
         this.user.getId(),
         driverLicense.getId(),
-        driverLicense.getLicenseNumber().getValue()
-      )
+        driverLicense.getLicenseNumber().getValue(),
+      ),
     );
   }
 
@@ -41,12 +45,11 @@ export class UserAggregate {
     this.driverLicense = undefined;
   }
 
-
   getFullName(): string {
     const parts = [
       this.user.getLastName(),
       this.user.getFirstName(),
-      this.user.getMiddleName()
+      this.user.getMiddleName(),
     ].filter(Boolean);
 
     return parts.join(' ');
@@ -54,10 +57,7 @@ export class UserAggregate {
 
   getDomainEvents(): DomainEvent[] {
     // Собираем события из всех entities внутри агрегата
-    const allEvents = [
-      ...this.domainEvents,
-      ...this.user.getDomainEvents(),
-    ];
+    const allEvents = [...this.domainEvents, ...this.user.getDomainEvents()];
 
     if (this.driverLicense) {
       allEvents.push(...this.driverLicense.getDomainEvents());

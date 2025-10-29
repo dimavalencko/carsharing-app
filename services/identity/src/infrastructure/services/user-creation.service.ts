@@ -8,9 +8,8 @@ export class UserCreationService {
 
   async createUserWithOptionalDriverLicense(
     userAggregate: UserAggregate,
-    driverLicense?: DriverLicense
+    driverLicense?: DriverLicense,
   ): Promise<void> {
-
     await this.txManager.execute(async ({ manager }) => {
       const uow = new UnitOfWork(manager);
 

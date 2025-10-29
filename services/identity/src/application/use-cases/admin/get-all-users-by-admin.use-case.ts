@@ -1,5 +1,5 @@
-import { UserAggregate } from "@/domain/aggregates/user";
-import { IUserRepository } from "@/domain/interfaces/repositories";
+import { UserAggregate } from '@/domain/aggregates/user';
+import { IUserRepository } from '@/domain/interfaces/repositories';
 
 export class GetAllUsersByAdminUseCase {
   constructor(private userRepository: IUserRepository) {}
@@ -7,7 +7,7 @@ export class GetAllUsersByAdminUseCase {
   async execute(adminId: string): Promise<UserAggregate[]> {
     // Проверяем, что вызывающий - администратор
     const adminAggregate = await this.userRepository.findById(adminId);
-    
+
     if (!adminAggregate) {
       throw new Error('Admin not found');
     }

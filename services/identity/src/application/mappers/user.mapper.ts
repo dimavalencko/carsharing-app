@@ -1,4 +1,4 @@
-import { UserAggregate } from "@/domain/aggregates/user";
+import { UserAggregate } from '@/domain/aggregates/user';
 
 export interface UserResponseDto {
   id: string;
@@ -20,7 +20,7 @@ export interface UserResponseDto {
 export class UserMapper {
   static toResponseDto(userAggregate: UserAggregate): UserResponseDto {
     const user = userAggregate.getUser();
-    
+
     return {
       id: user.getId(),
       username: user.getLogin().getValue(),
@@ -35,7 +35,7 @@ export class UserMapper {
       role: user.getRole(),
       hasDriverLicense: userAggregate.hasDriverLicense(),
       createdAt: user.getCreatedAt(),
-      updatedAt: user.getUpdatedAt()
+      updatedAt: user.getUpdatedAt(),
     };
   }
 }

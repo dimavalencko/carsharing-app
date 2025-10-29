@@ -1,4 +1,4 @@
-// value-object для валидации access-токена 
+// value-object для валидации access-токена
 export class AccessTokenValue {
   private constructor(private readonly value: string) {
     if (!value) {

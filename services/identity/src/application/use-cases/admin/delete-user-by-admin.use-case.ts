@@ -1,4 +1,4 @@
-import { IUserRepository } from "@/domain/interfaces/repositories";
+import { IUserRepository } from '@/domain/interfaces/repositories';
 
 export class DeleteUserByAdminUseCase {
   constructor(private userRepository: IUserRepository) {}
@@ -6,7 +6,7 @@ export class DeleteUserByAdminUseCase {
   async execute(adminId: string, userIdToDelete: string): Promise<void> {
     // Проверяем, что вызывающий - администратор
     const adminAggregate = await this.userRepository.findById(adminId);
-    
+
     if (!adminAggregate) {
       throw new Error('Admin not found');
     }
@@ -22,7 +22,8 @@ export class DeleteUserByAdminUseCase {
     }
 
     // Проверяем, что пользователь существует
-    const userToDeleteAggregate = await this.userRepository.findById(userIdToDelete);
+    const userToDeleteAggregate =
+      await this.userRepository.findById(userIdToDelete);
     if (!userToDeleteAggregate) {
       throw new Error('User not found');
     }

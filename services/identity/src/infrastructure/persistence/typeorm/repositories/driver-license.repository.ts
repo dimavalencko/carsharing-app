@@ -17,7 +17,9 @@ export class DriverLicenseRepository implements IDriverLicenseRepository {
     return entity ? DriverLicenseMapper.toDomain(entity) : null;
   }
 
-  async findByLicenseNumber(licenseNumber: string): Promise<DriverLicense | null> {
+  async findByLicenseNumber(
+    licenseNumber: string,
+  ): Promise<DriverLicense | null> {
     const entity = await this.ormRepo.findOne({ where: { licenseNumber } });
     return entity ? DriverLicenseMapper.toDomain(entity) : null;
   }

@@ -3,6 +3,7 @@ import eslint from '@eslint/js';
 import prettier from 'eslint-config-prettier';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+import prettierPlugin from 'eslint-plugin-prettier';
 
 export default tseslint.config(
   {
@@ -12,6 +13,7 @@ export default tseslint.config(
       'node_modules/**',
       'coverage/**',
       '*.config.js',
+      'test/**',
     ],
   },
   eslint.configs.recommended,
@@ -36,6 +38,9 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-argument': 'warn',
       // Добавляем правила для совместимости с Prettier
       'prettier/prettier': 'error',
+    },
+    plugins: {
+      prettier: prettierPlugin,
     },
   },
   prettier, // Должен быть последним чтобы перезаписать другие правила

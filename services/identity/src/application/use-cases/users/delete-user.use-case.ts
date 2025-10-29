@@ -1,11 +1,11 @@
-import { IUserRepository } from "@/domain/interfaces/repositories";
+import { IUserRepository } from '@/domain/interfaces/repositories';
 
 export class DeleteUserUseCase {
   constructor(private userRepository: IUserRepository) {}
 
   async execute(userId: string): Promise<void> {
     const userAggregate = await this.userRepository.findById(userId);
-    
+
     if (!userAggregate) {
       throw new Error('User not found');
     }
@@ -20,4 +20,3 @@ export class DeleteUserUseCase {
     await this.userRepository.delete(userId);
   }
 }
-

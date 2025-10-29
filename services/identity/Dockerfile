@@ -1,5 +1,5 @@
 # Базовый образ для сборки
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -18,28 +18,27 @@ COPY src/ ./src/
 RUN npm run build
 
 # Production образ
-FROM node:18-alpine AS production
+FROM node:20-alpine AS production
 
 WORKDIR /app
 
-ENV TZ=UTC
+ARG NODE_ENV=production
+ENV NODE_ENV=$NODE_ENV TZ=UTC
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nestjs -u 1001
 
 COPY package*.json ./
-
 RUN npm ci --only=production && npm cache clean --force
-
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
-
-COPY .env ./
 
 RUN chown -R nestjs:nodejs /app
 
 USER nestjs
 
-EXPOSE 3001 3002
+EXPOSE 3001
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD node -e "try{require('net').createConnection({host:'127.0.0.1',port:3001}).on('error',()=>process.exit(1)).on('connect',function(){this.end();});}catch(e){process.exit(1)}" || exit 1
 
 CMD ["node", "dist/main"]

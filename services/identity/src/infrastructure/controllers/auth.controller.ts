@@ -8,7 +8,17 @@ export class AuthController {
   constructor(private readonly auth: AuthFacadeService) {}
 
   @MessagePattern(IdentityEndpoints.AUTH.REGISTER)
-  async register(@Payload() data: { dto: { login: string; password: string; firstName: string; lastName?: string } }) {
+  async register(
+    @Payload()
+    data: {
+      dto: {
+        login: string;
+        password: string;
+        firstName: string;
+        lastName?: string;
+      };
+    },
+  ) {
     return this.auth.register(data.dto);
   }
 
@@ -23,7 +33,13 @@ export class AuthController {
   }
 
   @MessagePattern(IdentityEndpoints.AUTH.CHANGE_PASSWORD)
-  async changePassword(@Payload() data: { userId: string; dto: { oldPassword: string; newPassword: string } }) {
+  async changePassword(
+    @Payload()
+    data: {
+      userId: string;
+      dto: { oldPassword: string; newPassword: string };
+    },
+  ) {
     await this.auth.changePassword(data.userId, data.dto);
     return { success: true };
   }

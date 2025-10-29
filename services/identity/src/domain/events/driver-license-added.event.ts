@@ -4,7 +4,7 @@ export class DriverLicenseAddedEvent extends DomainEvent {
   constructor(
     public readonly userId: string,
     public readonly licenseId: string,
-    public readonly licenseNumber: string
+    public readonly licenseNumber: string,
   ) {
     super();
   }

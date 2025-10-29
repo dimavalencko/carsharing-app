@@ -19,7 +19,10 @@ export class RefreshTokenIssueService {
     });
   }
 
-  async rotateToken(oldTokenValue: string, newToken: RefreshToken): Promise<void> {
+  async rotateToken(
+    oldTokenValue: string,
+    newToken: RefreshToken,
+  ): Promise<void> {
     await this.txManager.execute(async ({ manager }) => {
       const uow = new UnitOfWork(manager);
 

@@ -1,6 +1,6 @@
-import { UserAggregate } from "@/domain/aggregates/user";
-import { IUserRepository } from "@/domain/interfaces/repositories";
-import { EmailValue, PhoneNumberValue } from "@/domain/value-objects";
+import { UserAggregate } from '@/domain/aggregates/user';
+import { IUserRepository } from '@/domain/interfaces/repositories';
+import { EmailValue, PhoneNumberValue } from '@/domain/value-objects';
 
 export interface UpdateUserProfileDto {
   lastName?: string;
@@ -25,9 +25,12 @@ type UserUpdateData = {
 export class UpdateUserProfileUseCase {
   constructor(private userRepository: IUserRepository) {}
 
-  async execute(userId: string, dto: UpdateUserProfileDto): Promise<UserAggregate> {
+  async execute(
+    userId: string,
+    dto: UpdateUserProfileDto,
+  ): Promise<UserAggregate> {
     const userAggregate = await this.userRepository.findById(userId);
-    
+
     if (!userAggregate) {
       throw new Error('User not found');
     }
@@ -39,7 +42,7 @@ export class UpdateUserProfileUseCase {
       middleName: dto.middleName,
       birthDate: dto.birthDate,
       city: dto.city,
-      avatarUrl: dto.avatarUrl
+      avatarUrl: dto.avatarUrl,
     };
 
     if (dto.email) {

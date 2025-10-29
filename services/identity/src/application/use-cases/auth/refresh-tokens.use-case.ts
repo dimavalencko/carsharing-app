@@ -1,6 +1,9 @@
-import { IRefreshTokenRepository, IUserRepository } from "@/domain/interfaces/repositories";
-import { IPasswordHasher, ITokenService } from "@/domain/interfaces/services";
-import { AuthService, TokenPair } from "@/domain/services/auth.service";
+import {
+  IRefreshTokenRepository,
+  IUserRepository,
+} from '@/domain/interfaces/repositories';
+import { IPasswordHasher, ITokenService } from '@/domain/interfaces/services';
+import { AuthService, TokenPair } from '@/domain/services/auth.service';
 
 export class RefreshTokensUseCase {
   private authService: AuthService;
@@ -9,13 +12,13 @@ export class RefreshTokensUseCase {
     userRepository: IUserRepository,
     refreshTokenRepository: IRefreshTokenRepository,
     tokenService: ITokenService,
-    passwordHasher: IPasswordHasher
+    passwordHasher: IPasswordHasher,
   ) {
     this.authService = new AuthService(
       userRepository,
       refreshTokenRepository,
       tokenService,
-      passwordHasher
+      passwordHasher,
     );
   }
 

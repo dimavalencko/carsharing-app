@@ -8,5 +8,5 @@ export const profiles = [
   { userId: '', city: 'Краснодар', profilePicture: null },
   { userId: '', city: 'Владивосток', profilePicture: null },
   { userId: '', city: 'Сочи', profilePicture: null },
-  { userId: '', city: 'Калининград', profilePicture: null }
-] 
+  { userId: '', city: 'Калининград', profilePicture: null },
+];

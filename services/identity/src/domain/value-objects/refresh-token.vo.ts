@@ -1,4 +1,4 @@
-// value-object для валидации refresh-токена 
+// value-object для валидации refresh-токена
 export class RefreshTokenValue {
   private constructor(private readonly value: string) {
     if (!value) {

@@ -14,7 +14,11 @@ export class UnitOfWork {
 
   constructor(private readonly manager: EntityManager) {
     this.users = new UserRepository(this.manager.getRepository(UserEntity));
-    this.driverLicenses = new DriverLicenseRepository(this.manager.getRepository(DriverLicenseEntity));
-    this.refreshTokens = new RefreshTokenRepository(this.manager.getRepository(RefreshTokenEntity));
+    this.driverLicenses = new DriverLicenseRepository(
+      this.manager.getRepository(DriverLicenseEntity),
+    );
+    this.refreshTokens = new RefreshTokenRepository(
+      this.manager.getRepository(RefreshTokenEntity),
+    );
   }
 }

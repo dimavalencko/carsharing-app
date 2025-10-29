@@ -1,10 +1,10 @@
 import { UserAggregate } from '@/domain/aggregates/user';
 import { User } from '@/domain/entities/user.entity';
 import { DriverLicense } from '@/domain/entities/driver-license.entity';
-import { 
-  LoginValue, 
-  PasswordValue, 
-  EmailValue, 
+import {
+  LoginValue,
+  PasswordValue,
+  EmailValue,
   PhoneNumberValue,
 } from '@/domain/value-objects';
 import { UserEntity } from '../entities/user.entity';
@@ -17,7 +17,7 @@ export class UserMapper {
    */
   static toPersistence(aggregate: UserAggregate): UserEntity {
     const user = aggregate.getUser();
-    
+
     const entity = new UserEntity();
     entity.id = user.getId();
     entity.login = user.getLogin().getValue();
@@ -54,7 +54,9 @@ export class UserMapper {
       lastName: entity.lastName,
       middleName: entity.middleName,
       email: entity.email ? EmailValue.create(entity.email) : undefined,
-      phoneNumber: entity.phoneNumber ? PhoneNumberValue.create(entity.phoneNumber) : undefined,
+      phoneNumber: entity.phoneNumber
+        ? PhoneNumberValue.create(entity.phoneNumber)
+        : undefined,
       birthDate: entity.birthDate,
       city: entity.city,
       avatarUrl: entity.avatarUrl,

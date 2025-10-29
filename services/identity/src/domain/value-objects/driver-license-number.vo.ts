@@ -2,7 +2,9 @@
 export class DriverLicenseNumberValue {
   private constructor(private readonly value: string) {
     if (!value || value.length < 5) {
-      throw new Error('Driver license number must be at least 5 characters long');
+      throw new Error(
+        'Driver license number must be at least 5 characters long',
+      );
     }
   }
 

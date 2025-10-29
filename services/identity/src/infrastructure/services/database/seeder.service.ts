@@ -6,10 +6,17 @@ import { User } from '@/domain/entities/user.entity';
 import { DriverLicense } from '@/domain/entities/driver-license.entity';
 import { UserAggregate } from '@/domain/aggregates/user';
 
-import type { IUserRepository, IDriverLicenseRepository } from '@/domain/interfaces/repositories';
+import type {
+  IUserRepository,
+  IDriverLicenseRepository,
+} from '@/domain/interfaces/repositories';
 import type { IPasswordHasher } from '@/domain/interfaces/services';
 
-import { LoginValue, PasswordValue, DriverLicenseNumberValue } from '@/domain/value-objects';
+import {
+  LoginValue,
+  PasswordValue,
+  DriverLicenseNumberValue,
+} from '@/domain/value-objects';
 
 //SeederService — отвечает за первоначальное наполнение БД базовыми данными
 @Injectable()
@@ -27,7 +34,8 @@ export class SeederService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    const autoSeed = this.configService.get<string>('AUTO_SEED', 'true') === 'true';
+    const autoSeed =
+      this.configService.get<string>('AUTO_SEED', 'true') === 'true';
     if (!autoSeed) {
       this.logger.log('AUTO_SEED is disabled. Skipping seeding.');
       return;
@@ -52,25 +60,42 @@ export class SeederService implements OnModuleInit {
       return;
     }
 
-    const adminLogin = this.configService.get<string>('DEFAULT_ADMIN_LOGIN', 'admin');
-    const adminPassword = this.configService.get<string>('DEFAULT_ADMIN_PASSWORD', 'admin123');
-    const adminFirstName = this.configService.get<string>('DEFAULT_ADMIN_FIRSTNAME', 'System');
-    const adminLastName = this.configService.get<string>('DEFAULT_ADMIN_LASTNAME', 'Administrator');
+    const adminLogin = this.configService.get<string>(
+      'DEFAULT_ADMIN_LOGIN',
+      'admin',
+    );
+    const adminPassword = this.configService.get<string>(
+      'DEFAULT_ADMIN_PASSWORD',
+      'admin123',
+    );
+    const adminFirstName = this.configService.get<string>(
+      'DEFAULT_ADMIN_FIRSTNAME',
+      'System',
+    );
+    const adminLastName = this.configService.get<string>(
+      'DEFAULT_ADMIN_LASTNAME',
+      'Administrator',
+    );
 
     const passwordHash = await this.passwordHasher.hash(adminPassword);
 
     const adminId = uuidv4();
-    const admin = User.createAdmin({
-      login: LoginValue.create(adminLogin),
-      password: PasswordValue.create(passwordHash),
-      firstName: adminFirstName,
-      lastName: adminLastName,
-    }, adminId);
+    const admin = User.createAdmin(
+      {
+        login: LoginValue.create(adminLogin),
+        password: PasswordValue.create(passwordHash),
+        firstName: adminFirstName,
+        lastName: adminLastName,
+      },
+      adminId,
+    );
 
     const aggregate = UserAggregate.create(admin);
     await this.userRepository.save(aggregate);
 
-    this.logger.log(`Default administrator created. Login: ${adminLogin} Password: ${adminPassword}`);
+    this.logger.log(
+      `Default administrator created. Login: ${adminLogin} Password: ${adminPassword}`,
+    );
   }
 
   // Создаёт N тестовых пользователей, если их ещё нет
@@ -90,12 +115,15 @@ export class SeederService implements OnModuleInit {
 
       const passwordHash = await this.passwordHasher.hash(passwordPlain);
 
-      const user = User.create({
-        login: LoginValue.create(login),
-        password: PasswordValue.create(passwordHash),
-        firstName: `User${i}`,
-        lastName: `Tester${i}`,
-      }, uuidv4());
+      const user = User.create(
+        {
+          login: LoginValue.create(login),
+          password: PasswordValue.create(passwordHash),
+          firstName: `User${i}`,
+          lastName: `Tester${i}`,
+        },
+        uuidv4(),
+      );
 
       const agg = UserAggregate.create(user);
       await this.userRepository.save(agg);
@@ -104,7 +132,7 @@ export class SeederService implements OnModuleInit {
     }
   }
 
-  // Выдаём водительские права части пользователей 
+  // Выдаём водительские права части пользователей
   private async seedDriverLicensesForSomeUsers(): Promise<void> {
     const users = await this.userRepository.findAll();
     // Пропускаем админа (он первый)
@@ -118,7 +146,8 @@ export class SeederService implements OnModuleInit {
     this.logger.log('Seeding driver licenses for some users...');
 
     for (let i = 0; i < regularUsers.length; i++) {
-      if (i % 2 === 0) { // каждому второму
+      if (i % 2 === 0) {
+        // каждому второму
         const aggregate = regularUsers[i];
         if (aggregate.getDriverLicense()) {
           continue;
@@ -127,23 +156,32 @@ export class SeederService implements OnModuleInit {
         const user = aggregate.getUser();
         const licenseId = uuidv4();
 
-        const driverLicense = DriverLicense.create({
-          userId: user.getId(),
-          firstName: user.getFirstName(),
-          lastName: user.getLastName() || 'Unknown',
-          middleName: user.getMiddleName(),
+        const driverLicense = DriverLicense.create(
+          {
+            userId: user.getId(),
+            firstName: user.getFirstName(),
+            lastName: user.getLastName() || 'Unknown',
+            middleName: user.getMiddleName(),
             birthDate: new Date(1995, 0, 1),
-          birthPlace: 'Unknown City',
-          issueDate: new Date(),
-          expiryDate: new Date(new Date().setFullYear(new Date().getFullYear() + 10)),
-          issuedBy: 'GIBDD Test',
-          licenseNumber: DriverLicenseNumberValue.create(`DL-${Math.floor(Math.random() * 100000)}`),
-        }, licenseId);
+            birthPlace: 'Unknown City',
+            issueDate: new Date(),
+            expiryDate: new Date(
+              new Date().setFullYear(new Date().getFullYear() + 10),
+            ),
+            issuedBy: 'GIBDD Test',
+            licenseNumber: DriverLicenseNumberValue.create(
+              `DL-${Math.floor(Math.random() * 100000)}`,
+            ),
+          },
+          licenseId,
+        );
 
         aggregate.addDriverLicense(driverLicense);
         await this.userRepository.save(aggregate);
 
-        this.logger.log(`✔ Added driver license to user ${user.getLogin().getValue()}`);
+        this.logger.log(
+          `✔ Added driver license to user ${user.getLogin().getValue()}`,
+        );
       }
     }
   }

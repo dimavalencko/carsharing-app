@@ -1,7 +1,7 @@
-import { UserAggregate } from "@/domain/aggregates/user";
-import { IUserRepository } from "@/domain/interfaces/repositories";
-import { IPasswordHasher } from "@/domain/interfaces/services";
-import { UserRegistrationService } from "@/domain/services/user-registration.service";
+import { UserAggregate } from '@/domain/aggregates/user';
+import { IUserRepository } from '@/domain/interfaces/repositories';
+import { IPasswordHasher } from '@/domain/interfaces/services';
+import { UserRegistrationService } from '@/domain/services/user-registration.service';
 
 export interface CreateAdminDto {
   username: string;
@@ -16,18 +16,18 @@ export class CreateAdminByAdminUseCase {
 
   constructor(
     private userRepository: IUserRepository,
-    private passwordHasher: IPasswordHasher
+    private passwordHasher: IPasswordHasher,
   ) {
     this.registrationService = new UserRegistrationService(
       userRepository,
-      passwordHasher
+      passwordHasher,
     );
   }
 
   async execute(adminId: string, dto: CreateAdminDto): Promise<UserAggregate> {
     // Проверяем, что вызывающий - администратор
     const adminAggregate = await this.userRepository.findById(adminId);
-    
+
     if (!adminAggregate) {
       throw new Error('Admin not found');
     }
@@ -43,7 +43,7 @@ export class CreateAdminByAdminUseCase {
       password: dto.password,
       firstName: dto.firstName,
       lastName: dto.lastName,
-      middleName: dto.middleName
+      middleName: dto.middleName,
     });
   }
 }

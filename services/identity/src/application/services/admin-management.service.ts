@@ -1,14 +1,14 @@
-import { IUserRepository } from "@/domain/interfaces/repositories";
-import { IPasswordHasher } from "@/domain/interfaces/services";
+import { IUserRepository } from '@/domain/interfaces/repositories';
+import { IPasswordHasher } from '@/domain/interfaces/services';
 import {
   CreateUserByAdminUseCase,
   CreateAdminByAdminUseCase,
   DeleteUserByAdminUseCase,
   GetAllUsersByAdminUseCase,
   CreateUserByAdminDto,
-  CreateAdminDto
-} from "../use-cases/admin";
-import { UserMapper, UserResponseDto } from "../mappers";
+  CreateAdminDto,
+} from '../use-cases/admin';
+import { UserMapper, UserResponseDto } from '../mappers';
 
 export class AdminManagementService {
   private createUserByAdminUseCase: CreateUserByAdminUseCase;
@@ -18,27 +18,43 @@ export class AdminManagementService {
 
   constructor(
     private userRepository: IUserRepository,
-    private passwordHasher: IPasswordHasher
+    private passwordHasher: IPasswordHasher,
   ) {
     this.createUserByAdminUseCase = new CreateUserByAdminUseCase(
       userRepository,
-      passwordHasher
+      passwordHasher,
     );
     this.createAdminByAdminUseCase = new CreateAdminByAdminUseCase(
       userRepository,
-      passwordHasher
+      passwordHasher,
     );
-    this.deleteUserByAdminUseCase = new DeleteUserByAdminUseCase(userRepository);
-    this.getAllUsersByAdminUseCase = new GetAllUsersByAdminUseCase(userRepository);
+    this.deleteUserByAdminUseCase = new DeleteUserByAdminUseCase(
+      userRepository,
+    );
+    this.getAllUsersByAdminUseCase = new GetAllUsersByAdminUseCase(
+      userRepository,
+    );
   }
 
-  async createUser(adminId: string, dto: CreateUserByAdminDto): Promise<UserResponseDto> {
-    const userAggregate = await this.createUserByAdminUseCase.execute(adminId, dto);
+  async createUser(
+    adminId: string,
+    dto: CreateUserByAdminDto,
+  ): Promise<UserResponseDto> {
+    const userAggregate = await this.createUserByAdminUseCase.execute(
+      adminId,
+      dto,
+    );
     return UserMapper.toResponseDto(userAggregate);
   }
 
-  async createAdmin(adminId: string, dto: CreateAdminDto): Promise<UserResponseDto> {
-    const adminAggregate = await this.createAdminByAdminUseCase.execute(adminId, dto);
+  async createAdmin(
+    adminId: string,
+    dto: CreateAdminDto,
+  ): Promise<UserResponseDto> {
+    const adminAggregate = await this.createAdminByAdminUseCase.execute(
+      adminId,
+      dto,
+    );
     return UserMapper.toResponseDto(adminAggregate);
   }
 
@@ -47,7 +63,10 @@ export class AdminManagementService {
   }
 
   async getAllUsers(adminId: string): Promise<UserResponseDto[]> {
-    const userAggregates = await this.getAllUsersByAdminUseCase.execute(adminId);
-    return userAggregates.map(aggregate => UserMapper.toResponseDto(aggregate));
+    const userAggregates =
+      await this.getAllUsersByAdminUseCase.execute(adminId);
+    return userAggregates.map((aggregate) =>
+      UserMapper.toResponseDto(aggregate),
+    );
   }
 }

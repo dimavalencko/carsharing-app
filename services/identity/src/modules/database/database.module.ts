@@ -24,7 +24,7 @@ import { PasswordHasherService } from '@/infrastructure/services/password-hasher
   providers: [
     {
       provide: 'DATA_SOURCE_OPTIONS',
-      useFactory: async (config: ConfigService): Promise<DataSourceOptions> => {
+      useFactory: (config: ConfigService): DataSourceOptions => {
         const isProd = config.get('NODE_ENV') === 'production';
 
         return {
@@ -32,17 +32,13 @@ import { PasswordHasherService } from '@/infrastructure/services/password-hasher
           host: config.get<string>('DB_HOST', 'localhost'),
           port: parseInt(config.get<string>('DB_PORT', '5432'), 10),
           username: config.get<string>('DB_USER', 'postgres'),
-          password: config.get<string>('DB_PASSWORD', 'postgres'),
+          password: config.get<string>('DB_PASSWORD', 'root'),
           database: config.get<string>('DB_NAME', 'identity_db'),
-          entities: [
-            UserEntity,
-            DriverLicenseEntity,
-            RefreshTokenEntity,
-          ],
+          entities: [UserEntity, DriverLicenseEntity, RefreshTokenEntity],
           synchronize: !isProd,
           logging: config.get('DB_LOGGING') === 'true',
           migrations: ['dist/migrations/*.js'],
-          migrationsRun: isProd,  // В проде автоматически прогоняем миграции
+          migrationsRun: isProd, // В проде автоматически прогоняем миграции
         };
       },
       inject: [ConfigService],
@@ -55,7 +51,7 @@ import { PasswordHasherService } from '@/infrastructure/services/password-hasher
           try {
             await createDatabaseIfNotExists();
           } catch (e) {
-            console.warn('Skipping DB create step:', e.message);
+            console.warn('Skipping DB create step:', (e as Error).message);
           }
         }
         const dataSource = new DataSource(options);
@@ -64,15 +60,11 @@ import { PasswordHasherService } from '@/infrastructure/services/password-hasher
       },
       inject: ['DATA_SOURCE_OPTIONS', ConfigService],
     },
-
-    // Транзакции
     {
       provide: 'TransactionManager',
       useFactory: (ds: DataSource) => new TransactionManager(ds),
       inject: [DataSource],
     },
-
-    // Репозитории (DI адаптеры под интерфейсы domain слоя)
     {
       provide: 'IUserRepository',
       useFactory: (ds: DataSource) =>
@@ -91,12 +83,9 @@ import { PasswordHasherService } from '@/infrastructure/services/password-hasher
         new RefreshTokenRepository(ds.getRepository(RefreshTokenEntity)),
       inject: [DataSource],
     },
-
-    // Оркестрационные сервисы
     {
       provide: 'UserCreationService',
-      useFactory: (tx: TransactionManager) =>
-        new UserCreationService(tx),
+      useFactory: (tx: TransactionManager) => new UserCreationService(tx),
       inject: ['TransactionManager'],
     },
     {
@@ -108,7 +97,6 @@ import { PasswordHasherService } from '@/infrastructure/services/password-hasher
       useClass: PasswordHasherService,
     },
 
-    // Seeder & init
     SeederService,
     DatabaseInitService,
   ],
@@ -118,7 +106,9 @@ import { PasswordHasherService } from '@/infrastructure/services/password-hasher
     'IRefreshTokenRepository',
     'TransactionManager',
     'UserCreationService',
+    'ITokenService',
+    'IPasswordHasher',
     DataSource,
   ],
 })
-export class DatabaseModule { }
+export class DatabaseModule {}

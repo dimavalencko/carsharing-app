@@ -1,4 +1,4 @@
-import { DriverLicense } from "@/domain/entities";
+import { DriverLicense } from '@/domain/entities';
 
 export interface DriverLicenseResponseDto {
   id: string;
@@ -33,7 +33,7 @@ export class DriverLicenseMapper {
       licenseNumber: driverLicense.getLicenseNumber().getValue(),
       isExpired: driverLicense.isExpired(),
       createdAt: driverLicense.getCreatedAt(),
-      updatedAt: driverLicense.getUpdatedAt()
+      updatedAt: driverLicense.getUpdatedAt(),
     };
   }
 }

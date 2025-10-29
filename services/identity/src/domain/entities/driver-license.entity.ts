@@ -1,5 +1,5 @@
-import { DriverLicenseNumberValue } from "../value-objects";
-import { DomainEvent, DriverLicenseCreatedEvent } from "../events";
+import { DriverLicenseNumberValue } from '../value-objects';
+import { DomainEvent, DriverLicenseCreatedEvent } from '../events';
 
 export interface DriverLicenseProps {
   userId: string;
@@ -21,16 +21,19 @@ export class DriverLicense {
 
   private constructor(
     private readonly id: string,
-    private props: DriverLicenseProps
+    private props: DriverLicenseProps,
   ) {}
 
-  static create(props: Omit<DriverLicenseProps, 'createdAt' | 'updatedAt'>, id: string): DriverLicense {
+  static create(
+    props: Omit<DriverLicenseProps, 'createdAt' | 'updatedAt'>,
+    id: string,
+  ): DriverLicense {
     const now = new Date();
-    
+
     if (props.issueDate >= props.expiryDate) {
       throw new Error('Issue date must be before expiry date');
     }
-    
+
     if (props.expiryDate <= new Date()) {
       throw new Error('Driver license has expired');
     }
@@ -38,15 +41,15 @@ export class DriverLicense {
     const driverLicense = new DriverLicense(id, {
       ...props,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     });
 
     driverLicense.addDomainEvent(
       new DriverLicenseCreatedEvent(
         id,
         props.userId,
-        props.licenseNumber.getValue()
-      )
+        props.licenseNumber.getValue(),
+      ),
     );
 
     return driverLicense;
@@ -56,27 +59,58 @@ export class DriverLicense {
     return new DriverLicense(id, props);
   }
 
-  getId(): string { return this.id; }
-  getUserId(): string { return this.props.userId; }
-  getFirstName(): string { return this.props.firstName; }
-  getLastName(): string { return this.props.lastName; }
-  getMiddleName(): string | undefined { return this.props.middleName; }
-  getBirthDate(): Date { return this.props.birthDate; }
-  getBirthPlace(): string { return this.props.birthPlace; }
-  getIssueDate(): Date { return this.props.issueDate; }
-  getExpiryDate(): Date { return this.props.expiryDate; }
-  getIssuedBy(): string { return this.props.issuedBy; }
-  getLicenseNumber(): DriverLicenseNumberValue { return this.props.licenseNumber; }
-  getCreatedAt(): Date { return this.props.createdAt; }
-  getUpdatedAt(): Date { return this.props.updatedAt; }
+  getId(): string {
+    return this.id;
+  }
+  getUserId(): string {
+    return this.props.userId;
+  }
+  getFirstName(): string {
+    return this.props.firstName;
+  }
+  getLastName(): string {
+    return this.props.lastName;
+  }
+  getMiddleName(): string | undefined {
+    return this.props.middleName;
+  }
+  getBirthDate(): Date {
+    return this.props.birthDate;
+  }
+  getBirthPlace(): string {
+    return this.props.birthPlace;
+  }
+  getIssueDate(): Date {
+    return this.props.issueDate;
+  }
+  getExpiryDate(): Date {
+    return this.props.expiryDate;
+  }
+  getIssuedBy(): string {
+    return this.props.issuedBy;
+  }
+  getLicenseNumber(): DriverLicenseNumberValue {
+    return this.props.licenseNumber;
+  }
+  getCreatedAt(): Date {
+    return this.props.createdAt;
+  }
+  getUpdatedAt(): Date {
+    return this.props.updatedAt;
+  }
 
-  updateInfo(updateData: Partial<Pick<DriverLicenseProps, 
-    'firstName' | 'lastName' | 'middleName' | 'birthPlace' | 'issuedBy'
-  >>): void {
+  updateInfo(
+    updateData: Partial<
+      Pick<
+        DriverLicenseProps,
+        'firstName' | 'lastName' | 'middleName' | 'birthPlace' | 'issuedBy'
+      >
+    >,
+  ): void {
     this.props = {
       ...this.props,
       ...updateData,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
   }
 
