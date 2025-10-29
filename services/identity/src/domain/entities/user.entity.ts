@@ -1,6 +1,6 @@
 import { DomainEvent, UserPasswordChangedEvent, UserRegisteredEvent } from "../events";
 import { PhoneNumberValue, LoginValue, PasswordValue, EmailValue } from "../value-objects";
-import { UserRoles } from "@carsharing/common";
+import { UserRoles } from "../enums";
 
 export interface UserProps {
   login: LoginValue;

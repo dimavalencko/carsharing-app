@@ -1,4 +1,4 @@
-import { UserRoles } from "@carsharing/common";
+import { UserRoles } from "../enums";
 
 export interface JwtPayload {
   userId: string;

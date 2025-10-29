@@ -12,6 +12,16 @@ export interface UpdateUserProfileDto {
   avatarUrl?: string;
 }
 
+type UserUpdateData = {
+  lastName?: string;
+  middleName?: string;
+  email?: EmailValue;
+  phoneNumber?: PhoneNumberValue;
+  birthDate?: Date;
+  city?: string;
+  avatarUrl?: string;
+};
+
 export class UpdateUserProfileUseCase {
   constructor(private userRepository: IUserRepository) {}
 
@@ -24,7 +34,7 @@ export class UpdateUserProfileUseCase {
 
     const user = userAggregate.getUser();
 
-    const updateData: any = {
+    const updateData: UserUpdateData = {
       lastName: dto.lastName,
       middleName: dto.middleName,
       birthDate: dto.birthDate,
