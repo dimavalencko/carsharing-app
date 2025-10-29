@@ -1,4 +1,5 @@
 import { DriverLicenseNumberValue } from "../value-objects";
+import { DomainEvent, DriverLicenseCreatedEvent } from "../events";
 
 export interface DriverLicenseProps {
   userId: string;
@@ -16,12 +17,14 @@ export interface DriverLicenseProps {
 }
 
 export class DriverLicense {
+  private domainEvents: DomainEvent[] = [];
+
   private constructor(
     private readonly id: string,
     private props: DriverLicenseProps
   ) {}
 
-  static create(props: Omit<DriverLicenseProps, 'createdAt' | 'updatedAt'>, id?: string): DriverLicense {
+  static create(props: Omit<DriverLicenseProps, 'createdAt' | 'updatedAt'>, id: string): DriverLicense {
     const now = new Date();
     
     if (props.issueDate >= props.expiryDate) {
@@ -32,15 +35,25 @@ export class DriverLicense {
       throw new Error('Driver license has expired');
     }
 
-    return new DriverLicense(id || this.generateId(), {
+    const driverLicense = new DriverLicense(id, {
       ...props,
       createdAt: now,
       updatedAt: now
     });
+
+    driverLicense.addDomainEvent(
+      new DriverLicenseCreatedEvent(
+        id,
+        props.userId,
+        props.licenseNumber.getValue()
+      )
+    );
+
+    return driverLicense;
   }
 
-  private static generateId(): string {
-    return Math.random().toString(36).substr(2, 9);
+  static reconstitute(id: string, props: DriverLicenseProps): DriverLicense {
+    return new DriverLicense(id, props);
   }
 
   getId(): string { return this.id; }
@@ -69,5 +82,17 @@ export class DriverLicense {
 
   isExpired(): boolean {
     return this.props.expiryDate <= new Date();
+  }
+
+  getDomainEvents(): DomainEvent[] {
+    return [...this.domainEvents];
+  }
+
+  clearDomainEvents(): void {
+    this.domainEvents = [];
+  }
+
+  private addDomainEvent(event: DomainEvent): void {
+    this.domainEvents.push(event);
   }
 }

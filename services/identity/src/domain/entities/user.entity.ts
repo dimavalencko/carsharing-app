@@ -1,3 +1,4 @@
+import { DomainEvent, UserPasswordChangedEvent, UserRegisteredEvent } from "../events";
 import { PhoneNumberValue, LoginValue, PasswordValue, EmailValue } from "../value-objects";
 import { UserRoles } from "@carsharing/common";
 
@@ -18,33 +19,57 @@ export interface UserProps {
 }
 
 export class User {
+  private domainEvents: DomainEvent[] = [];
+
   private constructor(
     private readonly id: string,
     private props: UserProps
-  ) {}
+  ) { }
 
-  static create(props: Omit<UserProps, 'createdAt' | 'updatedAt' | 'role'>, id?: string): User {
+  static create(props: Omit<UserProps, 'createdAt' | 'updatedAt' | 'role'>, id: string): User {
     const now = new Date();
-    return new User(id || this.generateId(), {
+    const user = new User(id, {
       ...props,
       role: UserRoles.User,
       createdAt: now,
       updatedAt: now
     });
+
+    user.addDomainEvent(
+      new UserRegisteredEvent(
+        id,
+        props.login.getValue(),
+        props.firstName,
+        props.lastName
+      )
+    );
+
+    return user;
   }
 
-  static createAdmin(props: Omit<UserProps, 'createdAt' | 'updatedAt' | 'role'>, id?: string): User {
+  static createAdmin(props: Omit<UserProps, 'createdAt' | 'updatedAt' | 'role'>, id: string): User {
     const now = new Date();
-    return new User(id || this.generateId(), {
+    const user = new User(id, {
       ...props,
       role: UserRoles.Admin,
       createdAt: now,
       updatedAt: now
     });
+
+    user.addDomainEvent(
+      new UserRegisteredEvent(
+        id,
+        props.login.getValue(),
+        props.firstName,
+        props.lastName
+      )
+    );
+
+    return user;
   }
 
-  private static generateId(): string {
-    return Math.random().toString(36).substr(2, 9);
+  static reconstitute(id: string, props: UserProps): User {
+    return new User(id, props);
   }
 
   getId(): string { return this.id; }
@@ -63,7 +88,7 @@ export class User {
   getUpdatedAt(): Date { return this.props.updatedAt; }
 
 
-  updateProfile(profileData: Partial<Pick<UserProps, 
+  updateProfile(profileData: Partial<Pick<UserProps,
     'lastName' | 'middleName' | 'email' | 'phoneNumber' | 'birthDate' | 'city' | 'avatarUrl'
   >>): void {
     this.props = {
@@ -73,12 +98,27 @@ export class User {
     };
   }
 
-  changePassword(newPassword: PasswordValue): void {
+ changePassword(newPassword: PasswordValue): void {
     this.props.password = newPassword;
     this.props.updatedAt = new Date();
+    this.addDomainEvent(
+      new UserPasswordChangedEvent(this.id, this.props.login.getValue())
+    );
   }
 
   isAdministrator(): boolean {
     return this.props.role === UserRoles.Admin;
+  }
+
+  getDomainEvents(): DomainEvent[] {
+    return [...this.domainEvents];
+  }
+
+  clearDomainEvents(): void {
+    this.domainEvents = [];
+  }
+
+  private addDomainEvent(event: DomainEvent): void {
+    this.domainEvents.push(event);
   }
 }

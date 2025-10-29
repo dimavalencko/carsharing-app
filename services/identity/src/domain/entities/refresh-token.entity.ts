@@ -1,3 +1,5 @@
+import { DomainEvent, RefreshTokenRevokedEvent } from "../events";
+
 export interface RefreshTokenProps {
   userId: string;
   token: string;
@@ -7,20 +9,22 @@ export interface RefreshTokenProps {
 }
 
 export class RefreshToken {
+  private domainEvents: DomainEvent[] = [];
+
   private constructor(
     private readonly id: string,
     private props: RefreshTokenProps
-  ) {}
+  ) { }
 
-  static create(props: Omit<RefreshTokenProps, 'createdAt'>, id?: string): RefreshToken {
-    return new RefreshToken(id || this.generateId(), {
+  static create(props: Omit<RefreshTokenProps, 'createdAt'>, id: string): RefreshToken {
+    return new RefreshToken(id, {
       ...props,
       createdAt: new Date()
     });
   }
 
-  private static generateId(): string {
-    return Math.random().toString(36).substr(2, 9);
+  static reconstitute(id: string, props: RefreshTokenProps): RefreshToken {
+    return new RefreshToken(id, props);
   }
 
   getId(): string { return this.id; }
@@ -31,7 +35,13 @@ export class RefreshToken {
   getRevokedAt(): Date | undefined { return this.props.revokedAt; }
 
   revoke(): void {
+    if (this.props.revokedAt) {
+      return;
+    }
     this.props.revokedAt = new Date();
+    this.addDomainEvent(
+      new RefreshTokenRevokedEvent(this.id, this.props.userId)
+    );
   }
 
   isRevoked(): boolean {
@@ -44,5 +54,17 @@ export class RefreshToken {
 
   isValid(): boolean {
     return !this.isRevoked() && !this.isExpired();
+  }
+
+  getDomainEvents(): DomainEvent[] {
+    return [...this.domainEvents];
+  }
+
+  clearDomainEvents(): void {
+    this.domainEvents = [];
+  }
+
+  private addDomainEvent(event: DomainEvent): void {
+    this.domainEvents.push(event);
   }
 }

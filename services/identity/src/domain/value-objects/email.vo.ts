@@ -1,9 +1,13 @@
 // value-object для валидации почты
 export class EmailValue {
-  constructor(private readonly value: string) {
+  private constructor(private readonly value: string) {
     if (!this.isValidEmail(value)) {
       throw new Error('Invalid email format');
     }
+  }
+
+  static create(value: string): EmailValue {
+    return new EmailValue(value);
   }
 
   private isValidEmail(email: string): boolean {
