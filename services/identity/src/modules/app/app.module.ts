@@ -1,11 +1,11 @@
-// app.module.ts
-import { Logger, Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
-import { UsersModule } from '../users/users.module';
-import { AuthModule } from '../auth/auth.module';
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from '../database/database.module';
+import { AuthModule } from '../auth/auth.module';
+import { UsersModule } from '../users/users.module';
 import { HealthModule } from '../health/health.module';
+import { AdminModule } from '../admin/admin.module';
+import { DriverLicenseModule } from '../driver-license/driver-license.module';
 
 @Module({
   imports: [
@@ -13,21 +13,12 @@ import { HealthModule } from '../health/health.module';
       isGlobal: true,
       envFilePath: `.env.${process.env.NODE_ENV || 'development'}`,
     }),
-     JwtModule.register({
-      secret: 'your_jwt_secret', // вынесите в env!
-      signOptions: { expiresIn: '15m' },
-    }),
-    
     DatabaseModule,
-    UsersModule,
     AuthModule,
+    UsersModule,
     HealthModule,
+    AdminModule,
+    DriverLicenseModule,
   ],
 })
-export class AppModule {
-  private readonly logger = new Logger(AppModule.name);
-
-  constructor() {
-    this.logger.log('AppModule initialized');
-  }
-}
+export class AppModule {}

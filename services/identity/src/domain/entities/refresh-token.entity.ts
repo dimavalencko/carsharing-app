@@ -1,69 +1,85 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
-import { User } from './user.entity';
+import { DomainEvent, RefreshTokenRevokedEvent } from '../events';
 
-@Entity('RefreshTokens')
-export class RefreshToken {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column({ name: 'token_hash', type: 'varchar', length: 255 })
-  tokenHash: string;
-
-  @Column({ name: 'expires_at' })
+export interface RefreshTokenProps {
+  userId: string;
+  token: string;
   expiresAt: Date;
-
-  @Column({ default: false })
- revoked: boolean;
-
-  @Column({ name: 'user_agent', type: 'varchar', length: 500, nullable: true })
-  userAgent: string | null = null;
-
-  @Column({ name: 'ip_address', type: 'varchar', length: 45, nullable: true })
-  ipAddress: string | null = null;
-
-  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+  revokedAt?: Date;
+}
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+export class RefreshToken {
+  private domainEvents: DomainEvent[] = [];
 
-  // Relation - для TypeORM
-  @ManyToOne(() => User, user => user.refreshTokens, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
-  user: User;
+  private constructor(
+    private readonly id: string,
+    private props: RefreshTokenProps,
+  ) {}
 
-  // Бизнес-логика
-  public revoke(): void {
-    this.revoked = true;
-  }
-
-  public isExpired(): boolean {
-    return this.expiresAt < new Date();
-  }
-
-  public isValid(): boolean {
-    return !this.revoked && !this.isExpired();
-  }
-
-  public setUser(user: User): void {
-    this.user = user;
-  }
-
-  // Фабричный метод
-  public static create(
-    tokenHash: string,
-    expiresAt: Date,
-    user: User,
-    userAgent?: string,
-    ipAddress?: string
+  static create(
+    props: Omit<RefreshTokenProps, 'createdAt'>,
+    id: string,
   ): RefreshToken {
-    const refreshToken = new RefreshToken();
-    refreshToken.tokenHash = tokenHash;
-    refreshToken.expiresAt = expiresAt;
-    refreshToken.user = user;
-    refreshToken.userAgent = userAgent || null;
-    refreshToken.ipAddress = ipAddress || null;
-    
-    return refreshToken;
+    return new RefreshToken(id, {
+      ...props,
+      createdAt: new Date(),
+    });
+  }
+
+  static reconstitute(id: string, props: RefreshTokenProps): RefreshToken {
+    return new RefreshToken(id, props);
+  }
+
+  getId(): string {
+    return this.id;
+  }
+  getUserId(): string {
+    return this.props.userId;
+  }
+  getToken(): string {
+    return this.props.token;
+  }
+  getExpiresAt(): Date {
+    return this.props.expiresAt;
+  }
+  getCreatedAt(): Date {
+    return this.props.createdAt;
+  }
+  getRevokedAt(): Date | undefined {
+    return this.props.revokedAt;
+  }
+
+  revoke(): void {
+    if (this.props.revokedAt) {
+      return;
+    }
+    this.props.revokedAt = new Date();
+    this.addDomainEvent(
+      new RefreshTokenRevokedEvent(this.id, this.props.userId),
+    );
+  }
+
+  isRevoked(): boolean {
+    return !!this.props.revokedAt;
+  }
+
+  isExpired(): boolean {
+    return this.props.expiresAt < new Date();
+  }
+
+  isValid(): boolean {
+    return !this.isRevoked() && !this.isExpired();
+  }
+
+  getDomainEvents(): DomainEvent[] {
+    return [...this.domainEvents];
+  }
+
+  clearDomainEvents(): void {
+    this.domainEvents = [];
+  }
+
+  private addDomainEvent(event: DomainEvent): void {
+    this.domainEvents.push(event);
   }
 }

@@ -1,94 +1,132 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
-import { User } from './user.entity';
+import { DriverLicenseNumberValue } from '../value-objects';
+import { DomainEvent, DriverLicenseCreatedEvent } from '../events';
 
-@Entity('DiverLicense')
-export class DriverLicense {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column({ name: 'license_number', type: 'varchar', unique: true, length: 50 })
-  licenseNumber: string;
-
-  @Column({ name: 'first_name', type: 'varchar', length: 50 })
+export interface DriverLicenseProps {
+  userId: string;
   firstName: string;
-
-  @Column({ name: 'last_name', type: 'varchar', length: 100 })
   lastName: string;
-
-  @Column({ name: 'patronymic', type: 'varchar', length: 100, nullable: true })
-  patronymic: string | null;
-
-  @Column({ name: 'birth_date', type: 'date' })
+  middleName?: string;
   birthDate: Date;
-
-  @Column({ name: 'issue_date', type: 'date' })
+  birthPlace: string;
   issueDate: Date;
+  expiryDate: Date;
+  issuedBy: string;
+  licenseNumber: DriverLicenseNumberValue;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-  @Column({ name: 'expiration_date', type: 'date' })
-  expirationDate: Date;
+export class DriverLicense {
+  private domainEvents: DomainEvent[] = [];
 
-  // Relation - для TypeORM
-  @OneToOne(() => User, user => user.driverLicense, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
-  user: User;
+  private constructor(
+    private readonly id: string,
+    private props: DriverLicenseProps,
+  ) {}
 
-   // Бизнес-логика
-   public isExpired(): boolean {
-    return this.expirationDate < new Date();
-  }
-
-  public getFullName(): string {
-    return [this.lastName, this.firstName, this.patronymic].filter(Boolean).join(' ');
-  }
-
-  public setUser(user: User): void {
-    this.user = user;
-  }
-
-  // Валидации
-  private validateLicenseNumber(licenseNumber: string): void {
-    if (!licenseNumber || licenseNumber.length < 5) {
-      throw new Error('License number must be at least 5 characters long');
-    }
-  }
-
-  private validateName(name: string, fieldName: string): void {
-    if (!name || name.length < 2) {
-      throw new Error(`${fieldName} must be at least 2 characters long`);
-    }
-  }
-
-  private validateBirthDate(birthDate: Date): void {
-    if (birthDate > new Date()) {
-      throw new Error('Birth date cannot be in the future');
-    }
-  }
-
-  private validateExpirationDate(expirationDate: Date): void {
-    if (expirationDate <= new Date()) {
-      throw new Error('Expiration date must be in the future');
-    }
-  }
-
-  // Фабричный метод
-  public static create(
-    licenseNumber: string,
-    firstName: string,
-    lastName: string,
-    birthDate: Date,
-    issueDate: Date,
-    expirationDate: Date,
-    patronymic: string | null = null
+  static create(
+    props: Omit<DriverLicenseProps, 'createdAt' | 'updatedAt'>,
+    id: string,
   ): DriverLicense {
-    const driverLicense = new DriverLicense();
-    driverLicense.licenseNumber = licenseNumber;
-    driverLicense.firstName = firstName;
-    driverLicense.lastName = lastName;
-    driverLicense.birthDate = birthDate;
-    driverLicense.issueDate = issueDate;
-    driverLicense.expirationDate = expirationDate;
-    driverLicense.patronymic = patronymic;
-    
+    const now = new Date();
+
+    if (props.issueDate >= props.expiryDate) {
+      throw new Error('Issue date must be before expiry date');
+    }
+
+    if (props.expiryDate <= new Date()) {
+      throw new Error('Driver license has expired');
+    }
+
+    const driverLicense = new DriverLicense(id, {
+      ...props,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    driverLicense.addDomainEvent(
+      new DriverLicenseCreatedEvent(
+        id,
+        props.userId,
+        props.licenseNumber.getValue(),
+      ),
+    );
+
     return driverLicense;
+  }
+
+  static reconstitute(id: string, props: DriverLicenseProps): DriverLicense {
+    return new DriverLicense(id, props);
+  }
+
+  getId(): string {
+    return this.id;
+  }
+  getUserId(): string {
+    return this.props.userId;
+  }
+  getFirstName(): string {
+    return this.props.firstName;
+  }
+  getLastName(): string {
+    return this.props.lastName;
+  }
+  getMiddleName(): string | undefined {
+    return this.props.middleName;
+  }
+  getBirthDate(): Date {
+    return this.props.birthDate;
+  }
+  getBirthPlace(): string {
+    return this.props.birthPlace;
+  }
+  getIssueDate(): Date {
+    return this.props.issueDate;
+  }
+  getExpiryDate(): Date {
+    return this.props.expiryDate;
+  }
+  getIssuedBy(): string {
+    return this.props.issuedBy;
+  }
+  getLicenseNumber(): DriverLicenseNumberValue {
+    return this.props.licenseNumber;
+  }
+  getCreatedAt(): Date {
+    return this.props.createdAt;
+  }
+  getUpdatedAt(): Date {
+    return this.props.updatedAt;
+  }
+
+  updateInfo(
+    updateData: Partial<
+      Pick<
+        DriverLicenseProps,
+        'firstName' | 'lastName' | 'middleName' | 'birthPlace' | 'issuedBy'
+      >
+    >,
+  ): void {
+    this.props = {
+      ...this.props,
+      ...updateData,
+      updatedAt: new Date(),
+    };
+  }
+
+  isExpired(): boolean {
+    return this.props.expiryDate <= new Date();
+  }
+
+  getDomainEvents(): DomainEvent[] {
+    return [...this.domainEvents];
+  }
+
+  clearDomainEvents(): void {
+    this.domainEvents = [];
+  }
+
+  private addDomainEvent(event: DomainEvent): void {
+    this.domainEvents.push(event);
   }
 }

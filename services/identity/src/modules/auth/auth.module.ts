@@ -1,33 +1,11 @@
-// auth.module.ts
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthController } from '@infrastructure/controllers/auth.controller';
-import { AuthService } from '@infrastructure/services/auth.service';
-import { UserRepository } from '@infrastructure/repositories/user.repository';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { User, RefreshToken } from '@domain/entities';
+import { DatabaseModule } from '../database/database.module';
+import { AuthController } from '@/infrastructure/controllers/auth.controller';
+import { AuthFacadeService } from '@/infrastructure/services/auth-facade.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User, RefreshToken]),
-    
-    JwtModule.registerAsync({
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || 'fallbackSecret',
-        signOptions: { expiresIn: `${configService.get<string>('JWT_EXPIRES_IN')}m` || '15m' },
-      }),
-      inject: [ConfigService],
-    }),
-  ],
+  imports: [DatabaseModule],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    {
-      provide: 'IUserRepository',
-      useClass: UserRepository,
-    },
-  ],
-  exports: [AuthService, JwtModule],
+  providers: [AuthFacadeService],
 })
 export class AuthModule {}
