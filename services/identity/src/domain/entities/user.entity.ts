@@ -1,133 +1,177 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { Profile } from './profile.entity';
-import { DriverLicense } from './driver-license.entity';
-import { RefreshToken } from './refresh-token.entity';
-import { Role } from './role.entity';
+import {
+  DomainEvent,
+  UserPasswordChangedEvent,
+  UserRegisteredEvent,
+} from '../events';
+import {
+  PhoneNumberValue,
+  LoginValue,
+  PasswordValue,
+  EmailValue,
+} from '../value-objects';
+import { UserRoles } from '../enums';
 
-@Entity('Users')
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column({ unique: true, length: 255 })
-  email: string;
-
-  @Column({ name: 'phone_number', type: 'varchar', unique: true, length: 20 })
-  phone: string;
-  
-  @Column({ name: 'password_hash', type: 'varchar', length: 255 })
-  protected passwordHash: string;
-
-  @CreateDateColumn({ name: 'created_at' })
+export interface UserProps {
+  login: LoginValue;
+  password: PasswordValue;
+  firstName: string;
+  lastName?: string;
+  middleName?: string;
+  email?: EmailValue;
+  phoneNumber?: PhoneNumberValue;
+  birthDate?: Date;
+  city?: string;
+  avatarUrl?: string;
+  role: UserRoles;
   createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+}
 
-  // Relations - для TypeORM делаем protected
-  @OneToOne(() => Profile, profile => profile.user, { cascade: true, eager: true })
-  profile: Profile;
+export class User {
+  private domainEvents: DomainEvent[] = [];
 
-  @OneToOne(() => DriverLicense, driverLicense => driverLicense.user, { cascade: true, eager: true })
-  driverLicense: DriverLicense;
+  private constructor(
+    private readonly id: string,
+    private props: UserProps,
+  ) {}
 
-  @OneToMany(() => RefreshToken, refreshToken => refreshToken.user)
-  refreshTokens: RefreshToken[];
+  static create(
+    props: Omit<UserProps, 'createdAt' | 'updatedAt' | 'role'>,
+    id: string,
+  ): User {
+    const now = new Date();
+    const user = new User(id, {
+      ...props,
+      role: UserRoles.User,
+      createdAt: now,
+      updatedAt: now,
+    });
 
-  @ManyToOne(() => Role, role => role.users)
-  @JoinColumn({ name: 'role_id' })
-  role: Role;
+    user.addDomainEvent(
+      new UserRegisteredEvent(
+        id,
+        props.login.getValue(),
+        props.firstName,
+        props.lastName,
+      ),
+    );
 
-  // Бизнес-методы
-  public getPasswordHash(): string {
-    return this.passwordHash;
-  }
-
-  public async setPassword(password: string): Promise<void> {
-    this.validatePasswordStrength(password);
-    this.passwordHash = await this.hashPassword(password);
-  }
-
-  public async validatePassword(password: string): Promise<boolean> {
-    return bcrypt.compare(password, this.passwordHash);
-  }
-
-  public setProfile(profile: Profile): void {
-    this.profile = profile;
-  }
-
-  public setDriverLicense(driverLicense: DriverLicense): void {
-    this.driverLicense = driverLicense;
-  }
-
-  public setRole(role: Role): void {
-    this.role = role;
-  }
-
-  public addRefreshToken(refreshToken: RefreshToken): void {
-    if (!this.refreshTokens) {
-      this.refreshTokens = [];
-    }
-    this.refreshTokens.push(refreshToken);
-  }
-
-  public revokeRefreshToken(tokenHash: string): void {
-    const token = this.refreshTokens.find(t => t.tokenHash === tokenHash);
-    if (token) {
-      token.revoke();
-    }
-  }
-
-  public revokeAllRefreshTokens(): void {
-    this.refreshTokens.forEach(token => token.revoke());
-  }
-
-  // Валидации
-  private validateEmail(email: string): void {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      throw new Error('Invalid email format');
-    }
-  }
-
-  private validatePhone(phone: string): void {
-    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
-    if (!phoneRegex.test(phone)) {
-      throw new Error('Invalid phone number format');
-    }
-  }
-
-  private validatePasswordStrength(password: string): void {
-    if (password.length < 8) {
-      throw new Error('Password must be at least 8 characters long');
-    }
-    if (!/[A-Z]/.test(password)) {
-      throw new Error('Password must contain at least one uppercase letter');
-    }
-    if (!/[0-9]/.test(password)) {
-      throw new Error('Password must contain at least one number');
-    }
-  }
-
-  private async hashPassword(password: string): Promise<string> {
-    const saltRounds = 12;
-    return bcrypt.hash(password, saltRounds);
-  }
-  
-  public static async create(
-    email: string,
-    phone: string,
-    password: string,
-    profile: Profile,
-    role: Role
-  ): Promise<User> {
-    const user = new User();
-    user.email = email;
-    user.phone = phone;
-    user.profile = profile;
-    user.role = role;
-    await user.setPassword(password);
     return user;
+  }
+
+  static createAdmin(
+    props: Omit<UserProps, 'createdAt' | 'updatedAt' | 'role'>,
+    id: string,
+  ): User {
+    const now = new Date();
+    const user = new User(id, {
+      ...props,
+      role: UserRoles.Admin,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    user.addDomainEvent(
+      new UserRegisteredEvent(
+        id,
+        props.login.getValue(),
+        props.firstName,
+        props.lastName,
+      ),
+    );
+
+    return user;
+  }
+
+  static reconstitute(id: string, props: UserProps): User {
+    return new User(id, props);
+  }
+
+  getId(): string {
+    return this.id;
+  }
+  getLogin(): LoginValue {
+    return this.props.login;
+  }
+  getPassword(): PasswordValue {
+    return this.props.password;
+  }
+  getFirstName(): string {
+    return this.props.firstName;
+  }
+  getLastName(): string | undefined {
+    return this.props.lastName;
+  }
+  getMiddleName(): string | undefined {
+    return this.props.middleName;
+  }
+  getEmail(): EmailValue | undefined {
+    return this.props.email;
+  }
+  getPhoneNumber(): PhoneNumberValue | undefined {
+    return this.props.phoneNumber;
+  }
+  getBirthDate(): Date | undefined {
+    return this.props.birthDate;
+  }
+  getCity(): string | undefined {
+    return this.props.city;
+  }
+  getAvatarUrl(): string | undefined {
+    return this.props.avatarUrl;
+  }
+  getRole(): UserRoles {
+    return this.props.role;
+  }
+  getCreatedAt(): Date {
+    return this.props.createdAt;
+  }
+  getUpdatedAt(): Date {
+    return this.props.updatedAt;
+  }
+
+  updateProfile(
+    profileData: Partial<
+      Pick<
+        UserProps,
+        | 'lastName'
+        | 'middleName'
+        | 'email'
+        | 'phoneNumber'
+        | 'birthDate'
+        | 'city'
+        | 'avatarUrl'
+      >
+    >,
+  ): void {
+    this.props = {
+      ...this.props,
+      ...profileData,
+      updatedAt: new Date(),
+    };
+  }
+
+  changePassword(newPassword: PasswordValue): void {
+    this.props.password = newPassword;
+    this.props.updatedAt = new Date();
+    this.addDomainEvent(
+      new UserPasswordChangedEvent(this.id, this.props.login.getValue()),
+    );
+  }
+
+  isAdministrator(): boolean {
+    return this.props.role === UserRoles.Admin;
+  }
+
+  getDomainEvents(): DomainEvent[] {
+    return [...this.domainEvents];
+  }
+
+  clearDomainEvents(): void {
+    this.domainEvents = [];
+  }
+
+  private addDomainEvent(event: DomainEvent): void {
+    this.domainEvents.push(event);
   }
 }

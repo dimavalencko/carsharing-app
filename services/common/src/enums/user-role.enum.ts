@@ -1,5 +1,4 @@
-export enum UserRole {
-  UnauthorizedUser = 'UnauthorizedUser',
+export enum UserRoles {
   User = 'User', 
   Admin = 'Admin',
 }

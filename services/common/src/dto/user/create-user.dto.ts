@@ -1,36 +1,29 @@
-import { IsEmail, IsString, MinLength, MaxLength, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsEmail, IsString, IsDate, IsOptional, MinLength } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateUserDto {
-  constructor(data: Partial<CreateUserDto>) {
-    Object.assign(this, data)
-  }
   @IsEmail()
-  @IsNotEmpty()
-  email!: string;
+  email: string;
 
   @IsString()
-  @IsNotEmpty()
-  phone!: string;
+  @MinLength(6)
+  password: string;
 
   @IsString()
-  @MinLength(8)
-  @MaxLength(100)
-  @IsNotEmpty()
-  password!: string;
+  firstName: string;
 
   @IsString()
-  @IsNotEmpty()
-  firstName!: string;
+  lastName: string;
 
-  @IsString()
-  @IsNotEmpty()
-  lastName!: string;
+  @IsDate()
+  @Type(() => Date)
+  dateOfBirth: Date;
 
-  @IsString()
   @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
   patronymic?: string;
-
-  @IsString()
-  @IsOptional()
-  profilePicture?: string;
 }

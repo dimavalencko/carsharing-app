@@ -1,42 +1,114 @@
-// database.module.ts
 import { Global, Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { DatabaseInitService } from '@infrastructure/services/database/database-init.service';
-import { SeederService } from '@infrastructure/services/database/seeder.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { User, RefreshToken, DriverLicense, Profile, Role } from '@domain/entities';
-import { createDatabaseIfNotExists } from 'scripts/create-database';
+import { DataSource, DataSourceOptions } from 'typeorm';
 
-@Global() // Делаем модуль глобальным
+import { UserEntity } from '@/infrastructure/persistence/typeorm/entities/user.entity';
+import { DriverLicenseEntity } from '@/infrastructure/persistence/typeorm/entities/driver-license.entity';
+import { RefreshTokenEntity } from '@/infrastructure/persistence/typeorm/entities/refresh-token.entity';
+
+import { UserRepository } from '@/infrastructure/persistence/typeorm/repositories/user.repository';
+import { DriverLicenseRepository } from '@/infrastructure/persistence/typeorm/repositories/driver-license.repository';
+import { RefreshTokenRepository } from '@/infrastructure/persistence/typeorm/repositories/refresh-token.repository';
+
+import { TransactionManager } from '@/infrastructure/persistence/typeorm/transaction/transaction-manager';
+import { UserCreationService } from '@/infrastructure/services/user-creation.service';
+import { SeederService } from '@/infrastructure/services/database/seeder.service';
+import { DatabaseInitService } from '@/infrastructure/services/database/database-init.service';
+import { createDatabaseIfNotExists } from '../../../scripts/create-database';
+import { TokenService } from '@/infrastructure/services/token.service';
+import { PasswordHasherService } from '@/infrastructure/services/password-hasher.service';
+
+@Global()
 @Module({
-  imports: [
-    ConfigModule,
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
-        // Создаем базу данных перед подключением
-        await createDatabaseIfNotExists();
-        
+  imports: [ConfigModule],
+  providers: [
+    {
+      provide: 'DATA_SOURCE_OPTIONS',
+      useFactory: (config: ConfigService): DataSourceOptions => {
+        const isProd = config.get('NODE_ENV') === 'production';
+
         return {
           type: 'postgres',
-          host: configService.get('DB_HOST'),
-          port: configService.get('DB_PORT'),
-          username: configService.get('DB_USERNAME'),
-          password: configService.get('DB_PASSWORD'),
-          database: configService.get('DB_NAME'),
-          entities: [User, Role, DriverLicense, Profile, RefreshToken],
-          synchronize: configService.get('NODE_ENV') !== 'production',
-          logging: configService.get('NODE_ENV') === 'development',
-          retryAttempts: 5,
-          retryDelay: 3000,
-          autoLoadEntities: true,
-          metadataTableName: 'typeorm_metadata'
+          host: config.get<string>('DB_HOST', 'localhost'),
+          port: parseInt(config.get<string>('DB_PORT', '5432'), 10),
+          username: config.get<string>('DB_USER', 'postgres'),
+          password: config.get<string>('DB_PASSWORD', 'root'),
+          database: config.get<string>('DB_NAME', 'identity_db'),
+          entities: [UserEntity, DriverLicenseEntity, RefreshTokenEntity],
+          synchronize: !isProd,
+          logging: config.get('DB_LOGGING') === 'true',
+          migrations: ['dist/migrations/*.js'],
+          migrationsRun: isProd, // В проде автоматически прогоняем миграции
         };
       },
       inject: [ConfigService],
-    }),
+    },
+    {
+      provide: DataSource,
+      useFactory: async (options: DataSourceOptions, config: ConfigService) => {
+        // Создание базы если её нет (dev convenience)
+        if (config.get('AUTO_CREATE_DB') === 'true') {
+          try {
+            await createDatabaseIfNotExists();
+          } catch (e) {
+            console.warn('Skipping DB create step:', (e as Error).message);
+          }
+        }
+        const dataSource = new DataSource(options);
+        await dataSource.initialize();
+        return dataSource;
+      },
+      inject: ['DATA_SOURCE_OPTIONS', ConfigService],
+    },
+    {
+      provide: 'TransactionManager',
+      useFactory: (ds: DataSource) => new TransactionManager(ds),
+      inject: [DataSource],
+    },
+    {
+      provide: 'IUserRepository',
+      useFactory: (ds: DataSource) =>
+        new UserRepository(ds.getRepository(UserEntity)),
+      inject: [DataSource],
+    },
+    {
+      provide: 'IDriverLicenseRepository',
+      useFactory: (ds: DataSource) =>
+        new DriverLicenseRepository(ds.getRepository(DriverLicenseEntity)),
+      inject: [DataSource],
+    },
+    {
+      provide: 'IRefreshTokenRepository',
+      useFactory: (ds: DataSource) =>
+        new RefreshTokenRepository(ds.getRepository(RefreshTokenEntity)),
+      inject: [DataSource],
+    },
+    {
+      provide: 'UserCreationService',
+      useFactory: (tx: TransactionManager) => new UserCreationService(tx),
+      inject: ['TransactionManager'],
+    },
+    {
+      provide: 'ITokenService',
+      useClass: TokenService,
+    },
+    {
+      provide: 'IPasswordHasher',
+      useClass: PasswordHasherService,
+    },
+
+    SeederService,
+    DatabaseInitService,
   ],
-  providers: [DatabaseInitService, SeederService],
-  exports: [TypeOrmModule]
+  exports: [
+    'IUserRepository',
+    'IDriverLicenseRepository',
+    'IRefreshTokenRepository',
+    'TransactionManager',
+    'UserCreationService',
+    'ITokenService',
+    'IPasswordHasher',
+    DataSource,
+  ],
 })
 export class DatabaseModule {}

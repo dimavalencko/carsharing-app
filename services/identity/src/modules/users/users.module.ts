@@ -1,29 +1,25 @@
-// users.module.ts
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersController } from '@infrastructure/controllers/users.controller';
-import { UsersService } from '@infrastructure/services/users.service';
-import { User, Profile } from '@domain/entities';
-import { UserRepository } from '@/infrastructure/repositories/user.repository';
+import { DatabaseModule } from '../database/database.module';
+import { UsersController } from '@/infrastructure/controllers/users.controller';
+import { UsersManagementService } from '@/application/services/users-management.service';
+import type { IUserRepository } from '@/domain/interfaces/IUserRepository';
+import type { IPasswordHasher } from '@/domain/interfaces/services/IPasswordHasher';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([User, Profile]),
-  ],
+  imports: [DatabaseModule],
   controllers: [UsersController],
   providers: [
-    UsersService,
     {
-      provide: 'IUserRepository',
-      useClass: UserRepository,
+      provide: 'UsersManagementService',
+      useFactory: (
+        userRepository: IUserRepository,
+        passwordHasher: IPasswordHasher,
+      ) => {
+        return new UsersManagementService(userRepository, passwordHasher);
+      },
+      inject: ['IUserRepository', 'IPasswordHasher'],
     },
   ],
-  exports: [
-    UsersService,
-    {
-      provide: 'IUserRepository',
-      useClass: UserRepository,
-    },
-  ]
+  exports: ['UsersManagementService'],
 })
 export class UsersModule {}

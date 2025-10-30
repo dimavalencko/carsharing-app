@@ -1,33 +1,13 @@
-import { IsEmail, IsString, MinLength, MaxLength, IsNotEmpty, IsOptional } from 'class-validator';
-
-export class CreateUserDto {
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
-
-  @IsString()
-  @IsNotEmpty()
-  phone: string;
-
-  @IsString()
-  @MinLength(8)
-  @MaxLength(100)
-  @IsNotEmpty()
+export interface CreateUserDto {
+  username: string;
   password: string;
-
-  @IsString()
-  @IsNotEmpty()
   firstName: string;
-
-  @IsString()
-  @IsNotEmpty()
-  lastName: string;
-
-  @IsString()
-  @IsOptional()
-  patronymic?: string;
-
-  @IsString()
-  @IsOptional()
-  profilePicture?: string;
+  lastName?: string;
+  middleName?: string;
+  email?: string;
+  phoneNumber?: string;
+  birthDate?: Date;
+  city?: string;
+  avatarUrl?: string;
+  role: string;
 }

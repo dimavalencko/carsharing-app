@@ -2,18 +2,39 @@ export const IdentityEndpoints = {
   USERS: {
     GET_ALL: 'identity.users.getAll',
     GET_BY_ID: 'identity.users.getById',
-    CREATE: 'identity.users.create',
+    GET_BY_EMAIL: 'identity.users.getByEmail',
+    GET_PROFILE: 'identity.users.getProfile',
     UPDATE: 'identity.users.update',
-    DELETE: 'identity.users.delete'
+    UPDATE_PROFILE: 'identity.users.updateProfile',
+    DELETE: 'identity.users.delete',
+    CREATE: 'identity.users.create',
+    EXISTS_BY_LOGIN: 'identity.users.existsByLogin',
+    EXISTS_BY_EMAIL: 'identity.users.existsByEmail',
   },
   AUTH: {
-    LOGIN: 'identity.auth.login',
     REGISTER: 'identity.auth.register',
+    LOGIN: 'identity.auth.login',
+    REFRESH: 'identity.auth.refresh',
+    LOGOUT: 'identity.auth.logout',
+    CHANGE_PASSWORD: 'identity.auth.changePassword',
     VALIDATE_TOKEN: 'identity.auth.validateToken',
-    REFRESH: 'identity.auth.refresh'
+    VALIDATE_USER: 'identity.auth.validateUser',
+    REVOKE_SESSIONS: 'identity.auth.revokeSessions',
+  },
+  DRIVER_LICENSE: {
+    CREATE: 'identity.driverLicense.create',
+    GET_BY_USER_ID: 'identity.driverLicense.getByUserId',
+    UPDATE: 'identity.driverLicense.update',
+    DELETE: 'identity.driverLicense.delete',
+  },
+  ADMIN: {
+    CREATE_USER: 'identity.admin.createUser',
+    CREATE_ADMIN: 'identity.admin.createAdmin',
+    DELETE_USER: 'identity.admin.deleteUser',
+    GET_ALL_USERS: 'identity.admin.getAllUsers',
   },
   HEALTH: {
     CHECK: 'identity.health.check',
-    CHECK_DB: 'identity.health.check_db'
-  }
-} as const;
+    CHECK_DB: 'identity.health.checkDb',
+  },
+};

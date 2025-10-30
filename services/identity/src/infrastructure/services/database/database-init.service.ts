@@ -13,25 +13,48 @@ export class DatabaseInitService implements OnApplicationBootstrap {
     @InjectDataSource()
     private dataSource: DataSource,
     private seederService: SeederService,
-    private configService: ConfigService
+    private configService: ConfigService,
   ) {
     this.logger.log('DatabaseInitService constructor called');
   }
 
   async onApplicationBootstrap() {
     this.logger.log('onApplicationBootstrap called');
-    
+
     try {
+      console.log('🔍 Checking DataSource initialization...');
+      console.log(
+        '🔍 DataSource isInitialized:',
+        this.dataSource.isInitialized,
+      );
+
+      // Если DataSource не инициализирована - инициализируем
+      if (!this.dataSource.isInitialized) {
+        console.log('🔍 Initializing DataSource...');
+        await this.dataSource.initialize();
+        console.log(
+          '🔍 DataSource initialized:',
+          this.dataSource.isInitialized,
+        );
+      }
+
+      // Проверяем metadata после инициализации
+      const entities = this.dataSource.entityMetadatas;
+      console.log(
+        '🔍 Available entities after initialization:',
+        entities.map((e) => e.name),
+      );
       // Проверяем соединение
       await this.dataSource.query('SELECT 1');
       this.logger.log('✅ Database connection established');
-      
+
       // Запуск миграций
       await this.runMigrations();
-      
+
       // Засеивание данных
       await this.seedData();
-      
+      this.logger.log('✅ Data seeding completed');
+
       this.logger.log('✅ Database initialization completed');
     } catch (error) {
       this.logger.error('❌ Database initialization failed:', error);
@@ -42,21 +65,29 @@ export class DatabaseInitService implements OnApplicationBootstrap {
   private async runMigrations() {
     try {
       // Проверяем, есть ли таблица миграций
-      const migrationTableExists = await this.dataSource.query(`
+      type ExistsRow = { exists: boolean };
+      const rows: unknown = await this.dataSource.query(`
         SELECT EXISTS (
           SELECT FROM information_schema.tables 
           WHERE table_schema = 'public' 
           AND table_name = 'migrations'
         )
       `);
-      
-      if (!migrationTableExists[0].exists) {
+      const migrationRows = Array.isArray(rows) ? rows : [];
+      const first: ExistsRow | undefined = migrationRows[0] as
+        | ExistsRow
+        | undefined;
+      const exists = first?.exists === true;
+      if (!exists) {
         this.logger.log('Running synchronize instead of migrations');
         await this.dataSource.synchronize();
         this.logger.log('✅ Synchronize completed');
       }
     } catch (error) {
-      this.logger.warn('Migrations failed, trying to synchronize...');
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      this.logger.warn(
+        `Migrations failed (${message}), trying to synchronize...`,
+      );
       await this.dataSource.synchronize();
       this.logger.log('✅ Synchronize completed as fallback');
     }
