@@ -1,4 +1,5 @@
 import { Controller } from '@nestjs/common';
+import { IdentityEndpoints } from '@carsharing/common';
 import { HealthService, HealthDbStatus } from '../services/health.service';
 import type { HealthStatus } from '../services/health.service';
 import { MessagePattern } from '@nestjs/microservices';
@@ -7,12 +8,12 @@ import { MessagePattern } from '@nestjs/microservices';
 export class HealthController {
   constructor(private readonly healthService: HealthService) {}
 
-  @MessagePattern('identity.health.check')
+  @MessagePattern(IdentityEndpoints.HEALTH.CHECK)
   checkHealth(): HealthStatus {
     return this.healthService.checkHealth();
   }
 
-  @MessagePattern('identity.health.check_db')
+  @MessagePattern(IdentityEndpoints.HEALTH.CHECK_DB)
   checkDatabase(): Promise<HealthDbStatus> {
     return this.healthService.checkDatabase();
   }
