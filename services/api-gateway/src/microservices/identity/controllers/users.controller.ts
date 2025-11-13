@@ -1,69 +1,61 @@
-import { Controller, Post, Get, Body, Param, Put, Inject, ParseUUIDPipe, Delete } from '@nestjs/common';
-import type { CreateUserDto } from '@carsharing/common';
+import {
+  Controller,
+  Get,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+  Query,
+} from '@nestjs/common';
 import { IdentityProxy } from '../proxy/identity.proxy';
+import { JwtAuthGuard } from '@src/guards';
+import { UpdateUserDto } from '../dto/user/update-user.dto';
 
 @Controller('identity/users')
+@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(private readonly identityProxy: IdentityProxy) {}
 
   @Get()
-  async getUsers() {
+  async getAll() {
     return this.identityProxy.getAllUsers();
   }
 
-  @Get('/:id')
-  async getUser(@Param('id', ParseUUIDPipe) userId: string) {
-    return this.identityProxy.getUserById(userId);
+  @Get('by-email')
+  async getByEmail(@Query('email') email: string) {
+    return this.identityProxy.getUserByEmail(email);
   }
 
-  @Post()
-  async createUser(@Body() user: CreateUserDto) {
-    return this.identityProxy.createUser(user)
+  @Get('profile')
+  async getMyProfile(@Request() req) {
+    return this.identityProxy.getProfile(
+      req.user.sub || req.user.id || req.user.userId,
+    );
   }
 
-  @Put('/:id')
-  async updateUser(@Param('id', ParseUUIDPipe) userId: string, @Body() user: CreateUserDto) {
-    return this.identityProxy.updateUser(userId, user)
+  @Get(':id')
+  async getUserById(@Param('id') id: string) {
+    return this.identityProxy.getUserById(id);
   }
 
-  @Delete('/:id')
-  async deleteUser(@Param('id', ParseUUIDPipe) userId: string) {
-    return this.identityProxy.deleteUser(userId)
+  @Put('profile')
+  async updateProfile(@Request() req, @Body() dto: UpdateUserDto) {
+    return this.identityProxy.updateProfile(
+      req.user.sub || req.user.id || req.user.userId,
+      dto,
+    );
   }
 
-  // @Put('user/:id/settings')
-  // async updateUser(@Param('id') userId: string, @Body() settings: any) {
-  //   try {
-  //     const result = await firstValueFrom(
-  //       this.identityProxy.send(IdentityEndpoints.USERS.UPDATE, { userId, settings })
-  //     );
-  //     return { success: true, data: result };
-  //   } catch (error) {
-  //     return { success: false, error: error.message };
-  //   }
-  // }
+  @Put(':id')
+  async updateUser(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    return this.identityProxy.updateUser(id, dto);
+  }
 
-  // @Get('health/identity')
-  // async healthCheck() {
-  //   try {
-  //     const result = await firstValueFrom(
-  //       this.identityProxy.send(IdentityEndpoints.HEALTH.CHECK, {})
-  //     );
-  //     return { status: 'healthy', identityService: result };
-  //   } catch (error) {
-  //     return { status: 'unhealthy', error: error.message };
-  //   }
-  // }
-
-  // @Get('health/identity/db')
-  // async healthCheckDb() {
-  //   try {
-  //     const result = await firstValueFrom(
-  //       this.identityProxy.send(IdentityEndpoints.HEALTH.CHECK_DB, {})
-  //     );
-  //     return { status: 'healthy', identityService: result };
-  //   } catch (error) {
-  //     return { status: 'unhealthy', error: error.message };
-  //   }
-  // }
+  @Delete(':id')
+  async deleteUser(@Param('id') id: string) {
+    await this.identityProxy.deleteUser(id);
+    return { message: 'User deleted successfully' };
+  }
 }

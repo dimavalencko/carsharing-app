@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../database/database.module';
 import { DriverLicenseController } from '@/infrastructure/controllers/driver-license.controller';
 import { DriverLicenseService } from '@/application/services/driver-license.service';
+import type { IDriverLicenseRepository, IUserRepository } from '@/domain/interfaces/repositories';
 
 @Module({
   imports: [DatabaseModule],
@@ -9,7 +10,13 @@ import { DriverLicenseService } from '@/application/services/driver-license.serv
   providers: [
     {
       provide: 'DriverLicenseService',
-      useClass: DriverLicenseService,
+      useFactory: (
+        driverLicenseRepository: IDriverLicenseRepository,
+        userRepository: IUserRepository,
+      ) => {
+        return new DriverLicenseService(driverLicenseRepository, userRepository);
+      },
+      inject: ['IDriverLicenseRepository', 'IUserRepository'],
     },
   ],
   exports: ['DriverLicenseService'],

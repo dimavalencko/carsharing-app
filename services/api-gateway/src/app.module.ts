@@ -19,11 +19,7 @@ import { IdentityModule } from './microservices/identity/identity.module';
       ]
     }),
     IdentityModule,
-    MicroservicesModule,
-    HealthModule
   ],
-  controllers: [AppController, UsersController, AuthController, HealthController],
-  providers: [AppService],
 })
 
 export class AppModule {}

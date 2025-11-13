@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { ServiceNames } from '@carsharing/common'
+import { ServiceNames } from '@carsharing/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -9,11 +9,11 @@ import { ServiceNames } from '@carsharing/common'
       {
         name: ServiceNames.IDENTITY,
         imports: [ConfigModule],
-        useFactory: (envConfigService: ConfigService) => ({
+        useFactory: (configService: ConfigService) => ({
           transport: Transport.TCP,
           options: {
-            host: envConfigService.get('IDENTITY_SERVICE_HOST') ?? 'localhost',
-            port: envConfigService.get('IDENTITY_SERVICE_PORT') ?? 3001,
+            host: configService.get('IDENTITY_HOST', 'localhost'),
+            port: configService.get('IDENTITY_PORT', 4001),
           },
         }),
         inject: [ConfigService],
