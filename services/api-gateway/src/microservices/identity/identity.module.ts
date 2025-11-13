@@ -1,23 +1,31 @@
-import { Module } from "@nestjs/common";
-import { UsersController } from "./controllers/users.controller";
-import { IdentityProxy } from "./proxy/identity.proxy";
-import { MicroservicesModule } from "../microservices.module";
-import { AuthController } from "src/auth/auth.controller";
+import { Module } from '@nestjs/common';
+import { MicroservicesModule } from '../microservices.module';
+import { AuthController } from './controllers/auth.controller';
+import { UsersController } from './controllers/users.controller';
+import { AdminController } from './controllers/admin.controller';
+import { DriverLicenseController } from './controllers/driver-license.controller';
+import { HealthController } from './controllers/health.controller';
+import { JwtAuthGuard, AdminGuard } from '@src/guards';
+import { IdentityProxy } from './proxy/identity.proxy';
 
 @Module({
-  imports: [
-    MicroservicesModule
-  ],
+  imports: [MicroservicesModule],
   controllers: [
-    UsersController,
     AuthController,
+    UsersController,
+    AdminController,
+    DriverLicenseController,
+    HealthController,
   ],
   providers: [
-    IdentityProxy
+    IdentityProxy,
+    JwtAuthGuard,
+    AdminGuard,
   ],
   exports: [
-    IdentityProxy
-  ]
+    IdentityProxy,
+    JwtAuthGuard,
+    AdminGuard,
+  ],
 })
-
-export class IdentityModule{}
+export class IdentityModule {}
