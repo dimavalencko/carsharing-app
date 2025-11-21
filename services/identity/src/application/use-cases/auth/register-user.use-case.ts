@@ -19,7 +19,7 @@ export class RegisterUserUseCase {
 
   async execute(dto: RegisterUserDto): Promise<UserAggregate> {
     return await this.registrationService.registerUser({
-      login: dto.username,
+      login: dto.login,
       password: dto.password,
       firstName: dto.firstName,
       lastName: dto.lastName,

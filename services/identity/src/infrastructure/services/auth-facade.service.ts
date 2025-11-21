@@ -11,6 +11,7 @@ import type {
 import { LoginValue, PasswordValue } from '@/domain/value-objects';
 import { User } from '@/domain/entities/user.entity';
 import { UserAggregate } from '@/domain/aggregates/user';
+import { RegisterUserDto } from '@/application';
 
 @Injectable()
 export class AuthFacadeService {
@@ -22,12 +23,7 @@ export class AuthFacadeService {
     @Inject('ITokenService') private readonly tokenService: ITokenService,
   ) {}
 
-  async register(dto: {
-    login: string;
-    password: string;
-    firstName: string;
-    lastName?: string;
-  }) {
+  async register(dto: RegisterUserDto) {
     if (await this.users.existsByLogin(dto.login)) {
       throw new Error('Login already in use');
     }

@@ -1,10 +1,8 @@
-import { ServiceNames } from '@carsharing/common';
+import { IdentityEndpoints, ServiceNames } from '@carsharing/common';
 import { Injectable, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom, timeout } from 'rxjs';
 import type { ServiceHealth } from '@carsharing/common' 
-
-
 
 @Injectable()
 export class HealthService {
@@ -45,9 +43,9 @@ export class HealthService {
     
     // Проверяем Identity Service
     healthResult['identity'] = await this.checkServiceHealth(
-      'identity', 
+      ServiceNames.IDENTITY,
       this.identityClient, 
-      'identity_health'
+      IdentityEndpoints.HEALTH.CHECK
     );
 
     // Статус самого API Gateway

@@ -2,14 +2,15 @@ import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { IdentityEndpoints } from '@carsharing/common';
 import { AuthFacadeService } from '@/infrastructure/services/auth-facade.service';
+import { LoginUserDto, RegisterUserDto } from '@/application';
 
 
 @Controller()
 export class AuthController {
-  constructor(private readonly auth: AuthFacadeService) {}
+  constructor(private readonly auth: AuthFacadeService) { }
 
   @MessagePattern(IdentityEndpoints.AUTH.REGISTER)
-  async register(@Payload() data: { login: string; password: string; firstName: string; lastName?: string }) {
+  async register(@Payload() data: RegisterUserDto) {
     try {
       return await this.auth.register(data);
     } catch (error) {
@@ -19,9 +20,9 @@ export class AuthController {
   }
 
   @MessagePattern(IdentityEndpoints.AUTH.LOGIN)
-  async login(@Payload() data: { login: string; password: string }) {
+  async login(@Payload() data: LoginUserDto) {
     try {
-      return await this.auth.login(data);
+      return await this.auth.login({ login: data.username, password: data.password });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       return { error: message, statusCode: 401 };
@@ -64,12 +65,13 @@ export class AuthController {
   async validateToken(@Payload() data: { accessToken: string }) {
     try {
       return { valid: true, statusCode: 200 };
-    } catch (error) {
+    }
+    catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       return { error: message, statusCode: 401 };
     }
   }
-  
+
 
   @MessagePattern(IdentityEndpoints.AUTH.VALIDATE_USER)
   async validateUser(@Payload() data: { login: string; password: string }) {

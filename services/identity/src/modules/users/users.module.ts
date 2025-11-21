@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { DatabaseModule } from '../database/database.module';
 import { UsersController } from '@/infrastructure/controllers/users.controller';
 import { UsersManagementService } from '@/application/services/users-management.service';
-import type { IUserRepository } from '@/domain/interfaces/IUserRepository';
+import type { IUserRepository } from '@/domain/interfaces/repositories';
 import type { IPasswordHasher } from '@/domain/interfaces/services/IPasswordHasher';
 
 @Module({

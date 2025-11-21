@@ -36,8 +36,13 @@ export class CreateUserByAdminUseCase {
     }
 
     const admin = adminAggregate.getUser();
+    
+    // Добавляем подробное логирование для отладки
+    console.log('Admin role:', admin.getRole());
+    console.log('Is administrator:', admin.isAdministrator());
+    
     if (!admin.isAdministrator()) {
-      throw new Error('Only administrators can create users');
+      throw new Error(`Admin access required. Current role: ${admin.getRole()}`);
     }
 
     // Создаем обычного пользователя
