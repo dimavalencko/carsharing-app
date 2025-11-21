@@ -1,0 +1,10 @@
+{
+  "locales": {
+    "ru": "Russian",
+    "en": "English"
+  },
+  "errors": {
+    "pageNotFound": "Page not found",
+    "goHome": "Go to home page"
+  }
+}
