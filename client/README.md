@@ -1,0 +1,121 @@
+# Vue 3 + TypeScript + Vite
+
+Шаблон проекта с архитектурой Feature-Sliced Design для Vue 3 приложений.
+
+## 🚀 Стек технологий
+
+- **Vue 3** - прогрессивный JavaScript-фреймворк
+- **TypeScript** - типизированный JavaScript
+- **Vite** - быстрый сборщик и dev-сервер
+- **SCSS** - препроцессор CSS
+- **Pinia** - state management
+- **Vue Router** - маршрутизация с обработкой ошибок
+- **Vue I18n** - интернационализация
+- **Axios** - HTTP-клиент для работы с API
+- **ESLint + Prettier + Stylelint** - линтинг и форматирование
+
+## 📁 Архитектура FSD
+
+```
+src/
+├── app/              # Инициализация приложения, стили, провайдеры
+├── pages/            # Страницы приложения (компоненты-роуты)
+├── features/         # Функциональные части приложения
+├── entities/         # Бизнес-сущности (модели + stores)
+└── shared/           # Переиспользуемые модули (UI, API, utils)
+```
+
+## 🛠️ Команды
+
+```bash
+npm run dev          # Запуск dev-сервера
+npm run build        # Сборка продакшн-версии
+npm run preview      # Просмотр продакшн-сборки
+npm run lint         # Проверка и исправление JS/TS кода
+npm run lint:styles  # Проверка и исправление стилей
+npm run format       # Форматирование кода
+npm run lint:format  # Полный линтинг (код + стили + форматирование)
+```
+
+## 🐳 Docker
+
+```bash
+docker build -t app-name .
+docker run -p 80:80 app-name
+```
+
+## 📝 Переменные окружения
+
+Создайте файл `.env` на основе `.env.example`:
+
+```bash
+VITE_APP_TITLE=YourAppName
+VITE_API_URL=https://api.example.com
+```
+
+## 🔧 Алиасы путей
+
+- `@/` → `src/`
+- `@app/` → `src/app/`
+- `@pages/` → `src/pages/`
+- `@features/` → `src/features/`
+- `@entities/` → `src/entities/`
+- `@shared/` → `src/shared/`
+
+## 💡 Особенности шаблона
+
+### Архитектура
+
+- ✅ Feature-Sliced Design архитектура
+- ✅ Stores в `entities/*/model/` вместо отдельной папки
+- ✅ Страница 404 и обработка ошибок роутера
+- ✅ Типизированные переменные окружения
+
+### Качество кода
+
+- ✅ ESLint с TypeScript и Vue правилами
+- ✅ Prettier для форматирования
+- ✅ Stylelint для CSS/SCSS
+- ✅ Настроенный `.editorconfig`
+- ✅ Git hooks ready (добавьте husky при необходимости)
+
+### Developer Experience
+
+- ✅ VS Code настройки и рекомендуемые расширения
+- ✅ Hot Module Replacement (HMR)
+- ✅ TypeScript strict mode
+- ✅ Path aliases для удобных импортов
+- ✅ SCSS с автоимпортом переменных
+
+### Production Ready
+
+- ✅ Dockerfile для контейнеризации
+- ✅ Nginx конфигурация для SPA
+- ✅ Оптимизированная сборка Vite
+- ✅ Gzip сжатие и кеширование статики
+
+## 🚀 Быстрый старт
+
+```bash
+# Клонирование и установка
+git clone <your-repo>
+cd <project-name>
+npm install
+
+# Создание .env файла
+cp .env.example .env
+
+# Запуск dev сервера
+npm run dev
+```
+
+## 📦 Рекомендуемые VS Code расширения
+
+При открытии проекта VS Code предложит установить:
+
+- Vue - Official (Volar)
+- TypeScript Vue Plugin
+- ESLint
+- Prettier
+- Stylelint
+- i18n Ally
