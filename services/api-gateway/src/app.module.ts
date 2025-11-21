@@ -19,6 +19,7 @@ import { IdentityModule } from './microservices/identity/identity.module';
       ]
     }),
     IdentityModule,
+    HealthModule
   ],
 })
 
