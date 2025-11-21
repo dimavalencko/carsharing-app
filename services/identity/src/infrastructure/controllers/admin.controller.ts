@@ -13,6 +13,9 @@ export class AdminController {
   @MessagePattern(IdentityEndpoints.ADMIN.CREATE_USER)
   async createUser(@Payload() data: { adminId: string; dto: any }) {
     try {
+      if (!data.adminId) {
+        return { error: 'adminId is required', statusCode: 400 };
+      }
       return await this.adminService.createUser(data.adminId, data.dto);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
