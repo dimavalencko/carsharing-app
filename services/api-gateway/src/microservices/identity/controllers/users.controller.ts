@@ -23,8 +23,16 @@ export class UsersController {
     return this.identityProxy.getAllUsers();
   }
 
+  @Get(':id')
+  async getUserById(@Param('id') id: string) {
+    return this.identityProxy.getUserById(id);
+  }
+
   @Get('by-email')
   async getByEmail(@Query('email') email: string) {
+    if(!email) {
+      return { message: 'Email query parameter is required' };
+    }
     return this.identityProxy.getUserByEmail(email);
   }
 
@@ -33,11 +41,6 @@ export class UsersController {
     return this.identityProxy.getProfile(
       req.user.sub || req.user.id || req.user.userId,
     );
-  }
-
-  @Get(':id')
-  async getUserById(@Param('id') id: string) {
-    return this.identityProxy.getUserById(id);
   }
 
   @Put('profile')
