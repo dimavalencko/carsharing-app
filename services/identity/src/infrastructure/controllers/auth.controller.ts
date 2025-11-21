@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { IdentityEndpoints } from '@carsharing/common';
 import { AuthFacadeService } from '@/infrastructure/services/auth-facade.service';
-import { LoginUserDto } from '@/application';
+import { LoginUserDto, RegisterUserDto } from '@/application';
 
 
 @Controller()
@@ -10,7 +10,7 @@ export class AuthController {
   constructor(private readonly auth: AuthFacadeService) { }
 
   @MessagePattern(IdentityEndpoints.AUTH.REGISTER)
-  async register(@Payload() data: { login: string; password: string; firstName: string; lastName?: string }) {
+  async register(@Payload() data: RegisterUserDto) {
     try {
       return await this.auth.register(data);
     } catch (error) {

@@ -6,7 +6,10 @@ import {
   HttpStatus,
   UseGuards,
   Request,
+  Req,
+  Res,
 } from '@nestjs/common';
+import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import { IdentityProxy } from '../proxy/identity.proxy';
 import { JwtAuthGuard } from '@src/guards';
 import { RegisterUserDto } from '../dto/auth/register-user.dto';
@@ -20,30 +23,62 @@ export class AuthController {
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() dto: RegisterUserDto) {
-    return this.identityProxy.register(dto);
+  async register(@Body() dto: RegisterUserDto, @Res({ passthrough: true }) res: ExpressResponse) {
+    const result = await this.identityProxy.register(dto);
+    
+    this.setAuthCookies(res, result.accessToken, result.refreshToken);
+    
+    return {
+      userId: result.userId,
+      username: result.username,
+      role: result.role,
+    };
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginUserDto) {
-    return this.identityProxy.login(dto);
+  async login(@Body() dto: LoginUserDto, @Res({ passthrough: true }) res: ExpressResponse) {
+    const result = await this.identityProxy.login(dto);
+    
+    this.setAuthCookies(res, result.accessToken, result.refreshToken);
+    
+    return {
+      userId: result.userId,
+      username: result.username,
+      role: result.role,
+    };
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@Body() dto: RefreshTokenDto) {
-    return this.identityProxy.refresh(dto);
+  async refresh(@Req() req: ExpressRequest, @Res({ passthrough: true }) res: ExpressResponse) {
+
+    const refreshToken = req.cookies?.refreshToken;
+    
+    if (!refreshToken) {
+      throw new Error('Refresh token not found');
+    }
+    
+    const result = await this.identityProxy.refresh({ refreshToken });
+    
+    this.setAuthCookies(res, result.accessToken, result.refreshToken);
+    
+    return { success: true };
   }
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async logout(@Request() req, @Body() body: { refreshToken?: string }) {
+  async logout(@Request() req, @Res({ passthrough: true }) res: ExpressResponse) {
+    const refreshToken = req.cookies?.refreshToken;
+    
     await this.identityProxy.logout(
       req.user.sub || req.user.id || req.user.userId,
-      body.refreshToken,
+      refreshToken,
     );
+    
+    this.clearAuthCookies(res);
+    
     return { message: 'Logged out successfully' };
   }
 
@@ -73,10 +108,37 @@ export class AuthController {
   @Post('revoke-sessions')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async revokeSessions(@Request() req) {
+  async revokeSessions(@Request() req, @Res({ passthrough: true }) res: ExpressResponse) {
     await this.identityProxy.revokeSessions(
       req.user.sub || req.user.id || req.user.userId,
     );
+    
+    this.clearAuthCookies(res);
+    
     return { message: 'All sessions revoked successfully' };
+  }
+
+  private setAuthCookies(res: any, accessToken: string, refreshToken: string) {
+    const cookieOptions = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict' as const,
+      path: '/',
+    };
+
+    res.cookie('accessToken', accessToken, {
+      ...cookieOptions,
+      maxAge: 15 * 60 * 1000, // 15 минут
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      ...cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
+    });
+  }
+
+  private clearAuthCookies(res: any) {
+    res.clearCookie('accessToken', { path: '/' });
+    res.clearCookie('refreshToken', { path: '/' });
   }
 }
