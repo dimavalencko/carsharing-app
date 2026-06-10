@@ -14,7 +14,8 @@
   "workspaces": [
     "api-gateway",
     "identity",
-    "common"
+    "common",
+    "cars"
   ],
   "devDependencies": {
     "@nestjs/cli": "^10.0.0"

@@ -2,10 +2,7 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Workspace root files (lockfile lives here)
 COPY package.json package-lock.json ./
-
-# Copy only package manifests first for better layer caching
 COPY common/package.json ./common/package.json
 COPY api-gateway/package.json ./api-gateway/package.json
 COPY identity/package.json ./identity/package.json
@@ -13,14 +10,11 @@ COPY cars/package.json ./cars/package.json
 
 RUN npm ci
 
-# Copy full source after deps install
 COPY common/ ./common/
-COPY identity/ ./identity/
+COPY cars/ ./cars/
 
-# Build @carsharing/common first — identity depends on its dist
 RUN npm run build --workspace=@carsharing/common
-
-RUN npm run build --workspace=identity
+RUN npm run build --workspace=cars
 
 FROM node:20-alpine AS production
 
@@ -41,16 +35,14 @@ COPY cars/package.json ./cars/package.json
 
 RUN npm ci --omit=dev && npm cache clean --force
 
-COPY --from=builder --chown=nestjs:nodejs /app/identity/dist ./identity/dist
+COPY --from=builder --chown=nestjs:nodejs /app/cars/dist ./cars/dist
 
 RUN chown -R nestjs:nodejs /app
 
 USER nestjs
 
-WORKDIR /app/identity
+WORKDIR /app/cars
 
-EXPOSE 3001
-
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD node -e "try{require('net').createConnection({host:'127.0.0.1',port:3001}).on('error',()=>process.exit(1)).on('connect',function(){this.end();});}catch(e){process.exit(1)}" || exit 1
+EXPOSE 3003
 
 CMD ["node", "dist/main"]
