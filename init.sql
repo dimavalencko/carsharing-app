@@ -1,1 +1,2 @@
 CREATE DATABASE cars;
+CREATE DATABASE booking;
