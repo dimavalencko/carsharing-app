@@ -10,6 +10,7 @@ COPY common/package.json ./common/package.json
 COPY identity/package.json ./identity/package.json
 COPY api-gateway/package.json ./api-gateway/package.json
 COPY cars/package.json ./cars/package.json
+COPY booking/package.json ./booking/package.json
 
 RUN npm ci
 
@@ -32,6 +33,7 @@ COPY common/package.json ./common/package.json
 COPY identity/package.json ./identity/package.json
 COPY api-gateway/package.json ./api-gateway/package.json
 COPY cars/package.json ./cars/package.json
+COPY booking/package.json ./booking/package.json
 
 RUN npm ci --omit=dev
 
