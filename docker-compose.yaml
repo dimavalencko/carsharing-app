@@ -3,8 +3,8 @@ version: '3.8'
 services:
   api-gateway:
     build:
-      context: ./services/api-gateway
-      dockerfile: Dockerfile
+      context: ./services
+      dockerfile: api-gateway/Dockerfile
     ports:
       - "3000:3000"
     environment:
@@ -25,8 +25,8 @@ services:
 
   identity:
     build:
-      context: ./services/identity
-      dockerfile: Dockerfile
+      context: ./services
+      dockerfile: identity/Dockerfile
     ports:
       - "3001:3001"
     environment:
@@ -37,6 +37,26 @@ services:
       - DB_USERNAME=postgres
       - DB_PASSWORD=root
       - DB_NAME=identity
+    depends_on:
+      - postgres
+    networks:
+      - carsharing-net
+    restart: unless-stopped
+
+  cars:
+    build:
+      context: ./services
+      dockerfile: cars/Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_PORT=3003
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=root
+      - DB_NAME=cars
     depends_on:
       - postgres
     networks:

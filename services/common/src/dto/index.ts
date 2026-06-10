@@ -3,3 +3,5 @@ export * from './auth';
 export * from './driver-license';
 export * from './profile';
 export * from './user';
+export * from './car';
+export * from './booking';
