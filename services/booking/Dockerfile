@@ -37,6 +37,7 @@ COPY booking/package.json ./booking/package.json
 
 RUN npm ci --omit=dev && npm cache clean --force
 
+COPY --from=builder --chown=nestjs:nodejs /app/common/dist ./common/dist
 COPY --from=builder --chown=nestjs:nodejs /app/booking/dist ./booking/dist
 
 RUN chown -R nestjs:nodejs /app

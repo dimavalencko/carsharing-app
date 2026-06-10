@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { BookingEntity } from '@/infrastructure/persistence/typeorm/entities/booking.entity';
 import { BookingRepository } from '@/infrastructure/persistence/typeorm/repositories/booking.repository';
+import { BookingSeederService } from '@/infrastructure/services/database/seeder.service';
 
 @Global()
 @Module({
@@ -38,6 +39,7 @@ import { BookingRepository } from '@/infrastructure/persistence/typeorm/reposito
         new BookingRepository(ds.getRepository(BookingEntity)),
       inject: [DataSource],
     },
+    BookingSeederService,
   ],
   exports: ['IBookingRepository', DataSource],
 })

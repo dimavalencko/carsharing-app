@@ -11,7 +11,7 @@ export class Booking {
   createdAt: Date;
   updatedAt: Date;
 
-  static create(props: Omit<Booking, 'createdAt' | 'updatedAt'>): Booking {
+  static create(props: Omit<Booking, 'createdAt' | 'updatedAt' | 'durationDays'>): Booking {
     const booking = new Booking();
     Object.assign(booking, props);
     booking.createdAt = new Date();
