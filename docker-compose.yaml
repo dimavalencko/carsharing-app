@@ -12,8 +12,14 @@ services:
       - PORT=3000
       - IDENTITY_HOST=identity
       - IDENTITY_PORT=3001
+      - CARS_SERVICE_HOST=cars
+      - CARS_SERVICE_PORT=3003
+      - BOOKING_SERVICE_HOST=booking
+      - BOOKING_SERVICE_PORT=3002
     depends_on:
       - identity
+      - cars
+      - booking
     networks:
       - carsharing-net
     restart: unless-stopped

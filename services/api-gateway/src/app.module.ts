@@ -2,12 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MicroservicesModule } from './microservices/microservices.module';
-import { UsersController } from './microservices/identity/controllers/users.controller';
-import { AuthController } from './microservices/identity/controllers/auth.controller';
 import { HealthModule } from './health/health.module';
-import { HealthController } from './health/health.controller';
 import { IdentityModule } from './microservices/identity/identity.module';
+import { CarsModule } from './microservices/cars/cars.module';
+import { BookingModule } from './microservices/booking/booking.module';
 
 @Module({
   imports: [
@@ -16,11 +14,14 @@ import { IdentityModule } from './microservices/identity/identity.module';
       envFilePath: [
         '.env',
         `.env.${process.env.NODE_ENV || 'development'}`,
-      ]
+      ],
     }),
     IdentityModule,
-    HealthModule
+    CarsModule,
+    BookingModule,
+    HealthModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
-
 export class AppModule {}
