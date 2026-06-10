@@ -16,6 +16,7 @@ services:
       - CARS_SERVICE_PORT=3003
       - BOOKING_SERVICE_HOST=booking
       - BOOKING_SERVICE_PORT=3002
+      - CORS_ORIGIN=http://localhost:5173
     depends_on:
       - identity
       - cars
