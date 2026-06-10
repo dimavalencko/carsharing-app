@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CarStatus } from '@carsharing/common';
 import { Booking } from '@/domain/entities/booking.entity';
 import { BookingStatus } from '@/domain/enums/booking-status.enum';
-import { IBookingRepository } from '@/domain/interfaces/repositories/IBookingRepository';
+import type { IBookingRepository } from '@/domain/interfaces/repositories/IBookingRepository';
 import { CarsClientService } from './cars-client.service';
 import { CreateBookingDto } from '../dto/create-booking.dto';
 

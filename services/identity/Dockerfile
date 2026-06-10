@@ -43,6 +43,7 @@ COPY booking/package.json ./booking/package.json
 
 RUN npm ci --omit=dev && npm cache clean --force
 
+COPY --from=builder --chown=nestjs:nodejs /app/common/dist ./common/dist
 COPY --from=builder --chown=nestjs:nodejs /app/identity/dist ./identity/dist
 
 RUN chown -R nestjs:nodejs /app
@@ -55,4 +56,4 @@ EXPOSE 3001
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD node -e "try{require('net').createConnection({host:'127.0.0.1',port:3001}).on('error',()=>process.exit(1)).on('connect',function(){this.end();});}catch(e){process.exit(1)}" || exit 1
 
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main"]

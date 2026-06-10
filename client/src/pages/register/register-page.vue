@@ -6,18 +6,23 @@ import { useAuthStore } from '@/entities/auth/model/auth.store';
 const auth = useAuthStore();
 const router = useRouter();
 
-const username = ref('');
+const login = ref('');
+const firstName = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const validationError = ref('');
 
 async function submit() {
   validationError.value = '';
+  if (password.value.length < 8) {
+    validationError.value = 'Пароль должен быть не менее 8 символов';
+    return;
+  }
   if (password.value !== confirmPassword.value) {
     validationError.value = 'Пароли не совпадают';
     return;
   }
-  await auth.register({ username: username.value, password: password.value });
+  await auth.register({ login: login.value, firstName: firstName.value, password: password.value });
   router.push('/cars');
 }
 </script>
@@ -31,14 +36,24 @@ async function submit() {
           {{ validationError || auth.error }}
         </div>
         <div class="form-field">
-          <label for="username">Имя пользователя</label>
+          <label for="login">Логин</label>
           <input
-            id="username"
-            v-model="username"
+            id="login"
+            v-model="login"
             type="text"
-            placeholder="Введите имя пользователя"
+            placeholder="Придумайте логин"
             required
             autocomplete="username"
+          />
+        </div>
+        <div class="form-field">
+          <label for="firstName">Имя</label>
+          <input
+            id="firstName"
+            v-model="firstName"
+            type="text"
+            placeholder="Введите ваше имя"
+            required
           />
         </div>
         <div class="form-field">
@@ -47,9 +62,9 @@ async function submit() {
             id="password"
             v-model="password"
             type="password"
-            placeholder="Не менее 6 символов"
+            placeholder="Не менее 8 символов"
             required
-            minlength="6"
+            minlength="8"
             autocomplete="new-password"
           />
         </div>

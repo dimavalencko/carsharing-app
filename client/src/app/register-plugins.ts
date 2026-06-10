@@ -7,8 +7,8 @@ import store from './store';
 
 function registerPlugins(app: App<Element>) {
   app.use(i18n);
-  app.use(router);
   app.use(store);
+  app.use(router);
 }
 
 export default registerPlugins;

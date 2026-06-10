@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { ICarRepository, CarFilters } from '@/domain/interfaces/repositories/ICarRepository';
+import type { ICarRepository, CarFilters } from '@/domain/interfaces/repositories/ICarRepository';
 import { Car } from '@/domain/entities/car.entity';
 import { CarStatus } from '@/domain/enums/car-status.enum';
 import { CreateCarDto } from '../dto/create-car.dto';

@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { CarEntity } from '@/infrastructure/persistence/typeorm/entities/car.entity';
 import { CarRepository } from '@/infrastructure/persistence/typeorm/repositories/car.repository';
+import { CarsSeederService } from '@/infrastructure/services/database/seeder.service';
 
 @Global()
 @Module({
@@ -37,6 +38,7 @@ import { CarRepository } from '@/infrastructure/persistence/typeorm/repositories
       useFactory: (ds: DataSource) => new CarRepository(ds.getRepository(CarEntity)),
       inject: [DataSource],
     },
+    CarsSeederService,
   ],
   exports: ['ICarRepository', DataSource],
 })

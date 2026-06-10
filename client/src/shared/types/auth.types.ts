@@ -7,12 +7,10 @@ export interface AuthUser {
 }
 
 export interface RegisterDto {
-  username: string;
+  login: string;
   password: string;
   firstName: string;
   lastName?: string;
-  email?: string;
-  phoneNumber?: string;
 }
 
 export interface LoginDto {
