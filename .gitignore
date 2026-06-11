@@ -130,8 +130,6 @@ dist
 !.vscode/extensions.json
 .vscode-test
 
-package-lock.json
-
 # yarn v3
 .pnp.*
 .yarn/*
