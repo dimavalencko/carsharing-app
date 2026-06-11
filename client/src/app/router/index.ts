@@ -72,17 +72,30 @@ const router = createRouter({
 });
 
 router.beforeEach((to, _from, next) => {
-  const authStore = useAuthStore();
+  const auth = useAuthStore();
 
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return next({ name: 'login', query: { redirect: to.fullPath } });
+  const isAdminRoute = to.path.startsWith('/admin');
+  const isGuestRoute = !!to.meta.requiresGuest;
+
+  if (!auth.isAuthenticated) {
+    if (to.meta.requiresAuth) {
+      return next({ name: 'login', query: { redirect: to.fullPath } });
+    }
+    return next();
   }
 
-  if (to.meta.requiresAdmin && !authStore.isAdmin) {
+  if (auth.isAdmin) {
+    if (!isAdminRoute) {
+      return next({ name: 'admin' });
+    }
+    return next();
+  }
+
+  if (isAdminRoute) {
     return next({ name: 'cars' });
   }
 
-  if (to.meta.requiresGuest && authStore.isAuthenticated) {
+  if (isGuestRoute) {
     return next({ name: 'cars' });
   }
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
+import AppPagination from '@/shared/ui/AppPagination.vue';
 import { useAdminStore } from '@/entities/admin/model/admin.store';
 import type { CreateAdminUserDto, UserRole } from '@/shared/types';
 
@@ -9,6 +10,9 @@ onMounted(() => store.fetchUsers());
 
 const searchQuery = ref('');
 const filterRole = ref<UserRole | ''>('');
+
+const currentPage = ref(1);
+const pageSize = ref(20);
 
 const filteredUsers = computed(() =>
   store.users.filter(u => {
@@ -21,6 +25,12 @@ const filteredUsers = computed(() =>
     return matchesQ && matchesRole;
   })
 );
+
+const paginatedUsers = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return filteredUsers.value.slice(start, start + pageSize.value);
+});
+watch(filteredUsers, () => { currentPage.value = 1; });
 
 // Create modal
 const showModal = ref(false);
@@ -127,19 +137,20 @@ function initials(u: { firstName: string; lastName?: string }) {
     <div class="table-card">
       <div v-if="store.loading" class="state-msg">Загрузка...</div>
       <div v-else-if="filteredUsers.length === 0" class="state-msg">Пользователи не найдены</div>
-      <table v-else class="data-table">
-        <thead>
-          <tr>
-            <th>Пользователь</th>
-            <th>Логин</th>
-            <th>Email</th>
-            <th>Роль</th>
-            <th>Дата регистрации</th>
-            <th>Действия</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="u in filteredUsers" :key="u.id">
+      <template v-else>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Пользователь</th>
+              <th>Логин</th>
+              <th>Email</th>
+              <th>Роль</th>
+              <th>Дата регистрации</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="u in paginatedUsers" :key="u.id">
             <td>
               <div class="user-cell">
                 <div class="user-avatar" :class="u.role === 'Admin' ? 'user-avatar--admin' : ''">
@@ -173,8 +184,16 @@ function initials(u: { firstName: string; lastName?: string }) {
               </button>
             </td>
           </tr>
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+        <AppPagination
+          :total="filteredUsers.length"
+          :current-page="currentPage"
+          :page-size="pageSize"
+          @update:current-page="currentPage = $event"
+          @update:page-size="pageSize = $event; currentPage = 1"
+        />
+      </template>
     </div>
 
     <!-- Create user modal -->

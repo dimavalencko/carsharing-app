@@ -77,7 +77,8 @@ onMounted(() => carStore.fetchById(carId));
       <button class="back-btn" @click="router.back()">← Назад</button>
       <div class="detail__grid">
         <div class="detail__img">
-          <span class="car-icon">🚗</span>
+          <img v-if="car.imageUrl" :src="car.imageUrl" :alt="`${car.brand} ${car.model}`" class="detail__photo" />
+          <span v-else class="car-icon">🚗</span>
         </div>
         <div class="detail__info">
           <div class="detail__title-row">
@@ -171,6 +172,15 @@ onMounted(() => carStore.fetchById(carId));
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+  }
+
+  &__photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 12px;
   }
 
   &__info {

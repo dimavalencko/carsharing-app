@@ -44,7 +44,7 @@ export class CarEntity {
   @Column({ type: 'int', nullable: true })
   mileage?: number;
 
-  @Column({ type: 'varchar', length: 500, nullable: true })
+  @Column({ type: 'text', nullable: true })
   imageUrl?: string;
 
   @Column({ type: 'text', nullable: true })
