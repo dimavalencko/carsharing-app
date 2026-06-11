@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/entities/auth/model/auth.store';
 
 const auth = useAuthStore();
 const router = useRouter();
-const route = useRoute();
 
 const username = ref('');
 const password = ref('');
 
 async function submit() {
   await auth.login({ username: username.value, password: password.value });
-  const redirect = (route.query.redirect as string) || '/cars';
-  router.push(redirect);
+  router.push(auth.isAdmin ? '/admin' : '/cars');
 }
 </script>
 

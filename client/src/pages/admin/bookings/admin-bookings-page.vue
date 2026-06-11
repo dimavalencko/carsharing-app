@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useBookingStore } from '@/entities/booking/model/booking.store';
 import { useCarStore } from '@/entities/car/model/car.store';
+import AppPagination from '@/shared/ui/AppPagination.vue';
 import type { Booking, BookingStatus } from '@/shared/types';
 
 const bookingStore = useBookingStore();
@@ -31,6 +32,14 @@ const filteredBookings = computed(() => {
     })
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 });
+
+const currentPage = ref(1);
+const pageSize = ref(20);
+const paginatedBookings = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return filteredBookings.value.slice(start, start + pageSize.value);
+});
+watch(filteredBookings, () => { currentPage.value = 1; });
 
 const actionLoading = ref<string | null>(null);
 
@@ -154,20 +163,21 @@ const statusCounts = computed(() => ({
     <div class="table-card">
       <div v-if="bookingStore.loading" class="state-msg">Загрузка...</div>
       <div v-else-if="filteredBookings.length === 0" class="state-msg">Бронирования не найдены</div>
-      <table v-else class="data-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Автомобиль</th>
-            <th>Период</th>
-            <th>Сумма</th>
-            <th>Статус</th>
-            <th>Создано</th>
-            <th>Действия</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="b in filteredBookings" :key="b.id">
+      <template v-else>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Автомобиль</th>
+              <th>Период</th>
+              <th>Сумма</th>
+              <th>Статус</th>
+              <th>Создано</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="b in paginatedBookings" :key="b.id">
             <td class="id-cell">{{ b.id.slice(0, 8) }}…</td>
             <td>{{ carById[b.carId] || '—' }}</td>
             <td class="date-cell">
@@ -195,8 +205,16 @@ const statusCounts = computed(() => ({
               </div>
             </td>
           </tr>
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+        <AppPagination
+          :total="filteredBookings.length"
+          :current-page="currentPage"
+          :page-size="pageSize"
+          @update:current-page="currentPage = $event"
+          @update:page-size="pageSize = $event; currentPage = 1"
+        />
+      </template>
     </div>
   </div>
 </template>
