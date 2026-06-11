@@ -1,6 +1,7 @@
 import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
+import { SEED_USER_IDS } from '@carsharing/common';
 
 import { User } from '@/domain/entities/user.entity';
 import { DriverLicense } from '@/domain/entities/driver-license.entity';
@@ -18,7 +19,6 @@ import {
   DriverLicenseNumberValue,
 } from '@/domain/value-objects';
 
-//SeederService — отвечает за первоначальное наполнение БД базовыми данными
 @Injectable()
 export class SeederService implements OnModuleInit {
   private readonly logger = new Logger(SeederService.name);
@@ -52,7 +52,6 @@ export class SeederService implements OnModuleInit {
     this.logger.log('Database seeding completed.');
   }
 
-  // Создаёт администратора по умолчанию, если система пуста
   private async seedDefaultAdmin(): Promise<void> {
     const existing = await this.userRepository.findAll();
     if (existing.length > 0) {
@@ -79,7 +78,7 @@ export class SeederService implements OnModuleInit {
 
     const passwordHash = await this.passwordHasher.hash(adminPassword);
 
-    const adminId = uuidv4();
+    const adminId = SEED_USER_IDS.ADMIN;
     const admin = User.createAdmin(
       {
         login: LoginValue.create(adminLogin),
@@ -98,16 +97,19 @@ export class SeederService implements OnModuleInit {
     );
   }
 
-  // Создаёт N тестовых пользователей, если их ещё нет
   private async seedTestUsers(count: number): Promise<void> {
     const existingUsers = await this.userRepository.findAll();
-    // Если уже больше 1 (админ), то пропускаем создание тестовых
     if (existingUsers.length > 1) {
       this.logger.log('Test users already seeded. Skipping.');
       return;
     }
 
     this.logger.log(`Seeding ${count} test users...`);
+
+    const userIds = [
+      SEED_USER_IDS.USER_1, SEED_USER_IDS.USER_2, SEED_USER_IDS.USER_3,
+      SEED_USER_IDS.USER_4, SEED_USER_IDS.USER_5,
+    ];
 
     for (let i = 1; i <= count; i++) {
       const login = `user${i}`;
@@ -122,7 +124,7 @@ export class SeederService implements OnModuleInit {
           firstName: `User${i}`,
           lastName: `Tester${i}`,
         },
-        uuidv4(),
+        userIds[i - 1] ?? uuidv4(),
       );
 
       const agg = UserAggregate.create(user);
@@ -132,10 +134,8 @@ export class SeederService implements OnModuleInit {
     }
   }
 
-  // Выдаём водительские права части пользователей
   private async seedDriverLicensesForSomeUsers(): Promise<void> {
     const users = await this.userRepository.findAll();
-    // Пропускаем админа (он первый)
     const regularUsers = users.slice(1);
 
     if (regularUsers.length === 0) {
@@ -147,7 +147,6 @@ export class SeederService implements OnModuleInit {
 
     for (let i = 0; i < regularUsers.length; i++) {
       if (i % 2 === 0) {
-        // каждому второму
         const aggregate = regularUsers[i];
         if (aggregate.getDriverLicense()) {
           continue;

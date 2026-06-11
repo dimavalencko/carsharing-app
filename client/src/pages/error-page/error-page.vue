@@ -1,47 +1,49 @@
+<script setup lang="ts">
+import { useRouter } from 'vue-router';
+import AppLayout from '@/app/layouts/AppLayout.vue';
+
+const router = useRouter();
+</script>
+
 <template>
-  <div class="error-page">
-    <h1>404</h1>
-    <p>{{ $t('errors.pageNotFound') }}</p>
-    <RouterLink to="/" class="btn-home">
-      {{ $t('errors.goHome') }}
-    </RouterLink>
-  </div>
+  <AppLayout>
+    <div class="error-page">
+      <span class="error-page__icon">🔍</span>
+      <h1>404 — Страница не найдена</h1>
+      <p>Запрошенная страница не существует</p>
+      <button class="btn btn--primary" @click="router.push('/cars')">На главную</button>
+    </div>
+  </AppLayout>
 </template>
 
-<script setup lang="ts"></script>
-
-<style scoped>
+<style scoped lang="scss">
 .error-page {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  min-height: 60vh;
+  gap: 16px;
   text-align: center;
+
+  &__icon { font-size: 64px; }
+
+  h1 { font-size: 28px; font-weight: 700; color: #111827; margin: 0; }
+  p { color: #6b7280; margin: 0; }
 }
 
-.error-page h1 {
-  font-size: 6rem;
-  margin: 0;
-  color: #e74c3c;
-}
+.btn {
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
 
-.error-page p {
-  font-size: 1.5rem;
-  margin: 1rem 0 2rem;
-  color: #666;
-}
-
-.btn-home {
-  padding: 0.75rem 2rem;
-  background: #3498db;
-  color: white;
-  text-decoration: none;
-  border-radius: 4px;
-  transition: background 0.3s;
-}
-
-.btn-home:hover {
-  background: #2980b9;
+  &--primary {
+    background: #2563eb;
+    color: #fff;
+    &:hover { background: #1d4ed8; }
+  }
 }
 </style>

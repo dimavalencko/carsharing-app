@@ -3,17 +3,24 @@ version: '3.8'
 services:
   api-gateway:
     build:
-      context: ./services/api-gateway
-      dockerfile: Dockerfile
+      context: ./services
+      dockerfile: api-gateway/Dockerfile
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - PORT=3000
       - IDENTITY_HOST=identity
       - IDENTITY_PORT=3001
+      - CARS_SERVICE_HOST=cars
+      - CARS_SERVICE_PORT=3003
+      - BOOKING_SERVICE_HOST=booking
+      - BOOKING_SERVICE_PORT=3002
+      - CORS_ORIGIN=http://localhost:5173
     depends_on:
       - identity
+      - cars
+      - booking
     networks:
       - carsharing-net
     restart: unless-stopped
@@ -25,20 +32,68 @@ services:
 
   identity:
     build:
-      context: ./services/identity
-      dockerfile: Dockerfile
+      context: ./services
+      dockerfile: identity/Dockerfile
     ports:
       - "3001:3001"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - SERVICE_PORT=3001
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=root
+      - DB_NAME=identity
+      - AUTO_SEED=true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - carsharing-net
+    restart: unless-stopped
+
+  booking:
+    build:
+      context: ./services
+      dockerfile: booking/Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=development
+      - SERVICE_PORT=3002
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USERNAME=postgres
       - DB_PASSWORD=root
-      - DB_NAME=identity
+      - DB_NAME=booking
+      - CARS_SERVICE_HOST=cars
+      - CARS_SERVICE_PORT=3003
+      - AUTO_SEED=true
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    networks:
+      - carsharing-net
+    restart: unless-stopped
+
+  cars:
+    build:
+      context: ./services
+      dockerfile: cars/Dockerfile
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=development
+      - SERVICE_PORT=3003
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=root
+      - DB_NAME=cars
+      - AUTO_SEED=true
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - carsharing-net
     restart: unless-stopped
@@ -50,7 +105,7 @@ services:
       - POSTGRES_PASSWORD=root
       - POSTGRES_DB=identity
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql

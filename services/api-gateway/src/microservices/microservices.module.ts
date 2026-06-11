@@ -18,6 +18,30 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         }),
         inject: [ConfigService],
       },
+      {
+        name: ServiceNames.CARS,
+        imports: [ConfigModule],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.TCP,
+          options: {
+            host: configService.get('CARS_SERVICE_HOST', 'localhost'),
+            port: parseInt(configService.get('CARS_SERVICE_PORT', '3003'), 10),
+          },
+        }),
+        inject: [ConfigService],
+      },
+      {
+        name: ServiceNames.BOOKING,
+        imports: [ConfigModule],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.TCP,
+          options: {
+            host: configService.get('BOOKING_SERVICE_HOST', 'localhost'),
+            port: parseInt(configService.get('BOOKING_SERVICE_PORT', '3002'), 10),
+          },
+        }),
+        inject: [ConfigService],
+      },
     ]),
   ],
   exports: [ClientsModule],

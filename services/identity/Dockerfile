@@ -1,23 +1,28 @@
-# Базовый образ для сборки
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Копируем package файлы для кэширования зависимостей
-COPY package*.json ./
-COPY nest-cli.json ./
-COPY tsconfig*.json ./
+# Workspace root files (lockfile lives here)
+COPY package.json package-lock.json ./
 
-# Устанавливаем зависимости включая devDependencies для сборки
-RUN npm ci --include=dev
+# Copy only package manifests first for better layer caching
+COPY common/package.json ./common/package.json
+COPY api-gateway/package.json ./api-gateway/package.json
+COPY identity/package.json ./identity/package.json
+COPY cars/package.json ./cars/package.json
+COPY booking/package.json ./booking/package.json
 
-# Копируем исходный код
-COPY src/ ./src/
+RUN npm ci
 
-# Собираем приложение
-RUN npm run build
+# Copy full source after deps install
+COPY common/ ./common/
+COPY identity/ ./identity/
 
-# Production образ
+# Build @carsharing/common first — identity depends on its dist
+RUN npm run build --workspace=@carsharing/common
+
+RUN npm run build --workspace=identity
+
 FROM node:20-alpine AS production
 
 WORKDIR /app
@@ -29,16 +34,26 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nestjs -u 1001
 
-COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
-COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
+COPY package.json package-lock.json ./
+COPY common/package.json ./common/package.json
+COPY api-gateway/package.json ./api-gateway/package.json
+COPY identity/package.json ./identity/package.json
+COPY cars/package.json ./cars/package.json
+COPY booking/package.json ./booking/package.json
+
+RUN npm ci --omit=dev && npm cache clean --force
+
+COPY --from=builder --chown=nestjs:nodejs /app/common/dist ./common/dist
+COPY --from=builder --chown=nestjs:nodejs /app/identity/dist ./identity/dist
 
 RUN chown -R nestjs:nodejs /app
 
 USER nestjs
 
+WORKDIR /app/identity
+
 EXPOSE 3001
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD node -e "try{require('net').createConnection({host:'127.0.0.1',port:3001}).on('error',()=>process.exit(1)).on('connect',function(){this.end();});}catch(e){process.exit(1)}" || exit 1
 
-CMD ["node", "dist/main"]
+CMD ["node", "dist/src/main"]
