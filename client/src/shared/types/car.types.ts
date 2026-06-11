@@ -34,3 +34,19 @@ export interface CreateCarDto {
   imageUrl?: string;
   description?: string;
 }
+
+export interface UpdateCarDto {
+  brand?: string;
+  model?: string;
+  year?: number;
+  category?: CarCategory;
+  status?: CarStatus;
+  pricePerDay?: number;
+  licensePlate?: string;
+  city?: string;
+  vin?: string;
+  color?: string;
+  mileage?: number;
+  imageUrl?: string;
+  description?: string;
+}

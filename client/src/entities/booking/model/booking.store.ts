@@ -5,6 +5,7 @@ import type { Booking, CreateBookingDto } from '@/shared/types';
 
 export const useBookingStore = defineStore('booking', () => {
   const bookings = ref<Booking[]>([]);
+  const allBookings = ref<Booking[]>([]);
   const activeBooking = ref<Booking | null>(null);
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -14,6 +15,18 @@ export const useBookingStore = defineStore('booking', () => {
     error.value = null;
     try {
       bookings.value = await bookingService.getMy();
+    } catch (e: any) {
+      error.value = e.response?.data?.message || 'Ошибка загрузки бронирований';
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function fetchAll() {
+    loading.value = true;
+    error.value = null;
+    try {
+      allBookings.value = await bookingService.getAll();
     } catch (e: any) {
       error.value = e.response?.data?.message || 'Ошибка загрузки бронирований';
     } finally {
@@ -47,12 +60,50 @@ export const useBookingStore = defineStore('booking', () => {
   async function cancel(id: string) {
     try {
       const updated = await bookingService.cancel(id);
-      const idx = bookings.value.findIndex(b => b.id === id);
-      if (idx !== -1) bookings.value[idx] = updated;
-      if (activeBooking.value?.id === id) activeBooking.value = null;
+      _replaceInAll(updated);
     } catch (e: any) {
       error.value = e.response?.data?.message || 'Ошибка отмены бронирования';
       throw e;
+    }
+  }
+
+  async function confirm(id: string) {
+    try {
+      const updated = await bookingService.confirm(id);
+      _replaceInAll(updated);
+    } catch (e: any) {
+      error.value = e.response?.data?.message || 'Ошибка подтверждения';
+      throw e;
+    }
+  }
+
+  async function start(id: string) {
+    try {
+      const updated = await bookingService.start(id);
+      _replaceInAll(updated);
+    } catch (e: any) {
+      error.value = e.response?.data?.message || 'Ошибка запуска аренды';
+      throw e;
+    }
+  }
+
+  async function complete(id: string) {
+    try {
+      const updated = await bookingService.complete(id);
+      _replaceInAll(updated);
+    } catch (e: any) {
+      error.value = e.response?.data?.message || 'Ошибка завершения аренды';
+      throw e;
+    }
+  }
+
+  function _replaceInAll(updated: Booking) {
+    const idx = bookings.value.findIndex(b => b.id === updated.id);
+    if (idx !== -1) bookings.value[idx] = updated;
+    const allIdx = allBookings.value.findIndex(b => b.id === updated.id);
+    if (allIdx !== -1) allBookings.value[allIdx] = updated;
+    if (activeBooking.value?.id === updated.id) {
+      activeBooking.value = updated.status === 'active' ? updated : null;
     }
   }
 
@@ -60,5 +111,8 @@ export const useBookingStore = defineStore('booking', () => {
     error.value = null;
   }
 
-  return { bookings, activeBooking, loading, error, fetchMy, fetchMyActive, create, cancel, clearError };
+  return {
+    bookings, allBookings, activeBooking, loading, error,
+    fetchMy, fetchAll, fetchMyActive, create, cancel, confirm, start, complete, clearError,
+  };
 });
