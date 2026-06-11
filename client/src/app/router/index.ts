@@ -1,41 +1,58 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import MainPage from '@pages/main-page/main-page.vue';
-import ErrorPage from '@pages/error-page/error-page.vue';
+import { useAuthStore } from '@/entities/auth/model/auth.store';
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
-      name: 'home',
       path: '/',
-      component: MainPage,
-      meta: {},
-      redirect: {
-        name: 'posts',
-      },
-      children: [
-        {
-          name: 'posts',
-          path: 'posts',
-          component: () => import('@pages/posts/posts-page.vue'),
-          meta: {},
-        },
-      ],
+      redirect: '/cars',
     },
     {
-      name: 'notFound',
+      name: 'login',
+      path: '/login',
+      component: () => import('@pages/login/login-page.vue'),
+      meta: { requiresGuest: true },
+    },
+    {
+      name: 'register',
+      path: '/register',
+      component: () => import('@pages/register/register-page.vue'),
+      meta: { requiresGuest: true },
+    },
+    {
+      name: 'cars',
+      path: '/cars',
+      component: () => import('@pages/cars/cars-page.vue'),
+    },
+    {
+      name: 'car-detail',
+      path: '/cars/:id',
+      component: () => import('@pages/car-detail/car-detail-page.vue'),
+    },
+    {
+      name: 'bookings',
+      path: '/bookings',
+      component: () => import('@pages/bookings/bookings-page.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      name: 'not-found',
       path: '/:pathMatch(.*)*',
-      component: ErrorPage,
-      meta: { title: '404 - Page Not Found' },
+      component: () => import('@pages/error-page/error-page.vue'),
     },
   ],
 });
 
-// Navigation guards
 router.beforeEach((to, _from, next) => {
-  // Set page title
-  if (to.meta.title) {
-    document.title = to.meta.title as string;
+  const authStore = useAuthStore();
+
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    return next({ name: 'login', query: { redirect: to.fullPath } });
+  }
+
+  if (to.meta.requiresGuest && authStore.isAuthenticated) {
+    return next({ name: 'cars' });
   }
 
   next();
