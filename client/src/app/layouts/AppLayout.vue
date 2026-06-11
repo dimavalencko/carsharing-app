@@ -19,6 +19,13 @@ async function handleLogout() {
         <nav class="navbar__nav">
           <RouterLink to="/cars">Автомобили</RouterLink>
           <RouterLink v-if="auth.isAuthenticated" to="/bookings">Мои бронирования</RouterLink>
+          <RouterLink v-if="auth.isAdmin" to="/admin" class="navbar__admin-link">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: -2px;">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+            </svg>
+            Панель администратора
+          </RouterLink>
         </nav>
         <div class="navbar__auth">
           <template v-if="auth.isAuthenticated">
@@ -86,6 +93,25 @@ async function handleLogout() {
       &:hover, &.router-link-active {
         color: #2563eb;
       }
+    }
+  }
+
+  &__admin-link {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: #eff6ff;
+    border-radius: 6px;
+    color: #1d4ed8 !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    border: 1px solid #bfdbfe;
+    transition: background 0.15s !important;
+
+    &:hover, &.router-link-active {
+      background: #dbeafe !important;
+      color: #1e40af !important;
     }
   }
 

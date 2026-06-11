@@ -1,5 +1,5 @@
 import { defaultHttpClient } from '@/app/axios/defaultHttpClient';
-import type { Car, CarCategory, CarStatus, CreateCarDto } from '@/shared/types';
+import type { Car, CarCategory, CarStatus, CreateCarDto, UpdateCarDto } from '@/shared/types';
 
 export interface CarsFilters {
   category?: CarCategory;
@@ -25,6 +25,11 @@ export const carsService = {
 
   async create(dto: CreateCarDto): Promise<Car> {
     const { data } = await defaultHttpClient.post<Car>('/cars', dto);
+    return data;
+  },
+
+  async update(id: string, dto: UpdateCarDto): Promise<Car> {
+    const { data } = await defaultHttpClient.put<Car>(`/cars/${id}`, dto);
     return data;
   },
 
