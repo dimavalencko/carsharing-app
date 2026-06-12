@@ -1,10 +1,21 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, computed } from 'vue';
 import AppLayout from '@/app/layouts/AppLayout.vue';
 import { useBookingStore } from '@/entities/booking/model/booking.store';
+import { useCarStore } from '@/entities/car/model/car.store';
 import type { Booking } from '@/shared/types';
 
 const store = useBookingStore();
+const carStore = useCarStore();
+
+const carMap = computed(() =>
+  Object.fromEntries(carStore.cars.map(c => [c.id, c]))
+);
+
+function carName(carId: string): string {
+  const car = carMap.value[carId];
+  return car ? `${car.brand} ${car.model} ${car.year}` : carId;
+}
 
 const statusLabel: Record<string, string> = {
   pending: 'Ожидает', confirmed: 'Подтверждено', active: 'Активно',
@@ -29,7 +40,10 @@ async function cancel(id: string) {
   await store.cancel(id);
 }
 
-onMounted(() => store.fetchMy());
+onMounted(() => {
+  store.fetchMy();
+  if (!carStore.cars.length) carStore.fetchAll();
+});
 </script>
 
 <template>
@@ -48,7 +62,7 @@ onMounted(() => store.fetchMy());
           <div class="booking-card__header">
             <div class="booking-card__car">
               <span class="car-icon">🚗</span>
-              <span class="booking-card__car-id">{{ booking.carId }}</span>
+              <span class="booking-card__car-name">{{ carName(booking.carId) }}</span>
             </div>
             <span class="badge" :class="statusClass[booking.status]">{{ statusLabel[booking.status] }}</span>
           </div>
@@ -129,10 +143,10 @@ onMounted(() => store.fetchMy());
     gap: 10px;
   }
 
-  &__car-id {
-    font-size: 13px;
-    color: #6b7280;
-    font-family: monospace;
+  &__car-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
   }
 
   &__dates {

@@ -1,9 +1,18 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/entities/auth/model/auth.store';
+import { useProfileStore } from '@/entities/profile/model/profile.store';
 import { useRouter } from 'vue-router';
+import { onMounted } from 'vue';
 
 const auth = useAuthStore();
+const profileStore = useProfileStore();
 const router = useRouter();
+
+onMounted(() => {
+  if (auth.isAuthenticated && !profileStore.profile && !profileStore.loading) {
+    profileStore.fetchProfile();
+  }
+});
 
 async function handleLogout() {
   await auth.logout();
@@ -15,7 +24,10 @@ async function handleLogout() {
   <div class="layout">
     <header class="navbar">
       <div class="navbar__inner">
-        <RouterLink class="navbar__logo" to="/cars">🚗 CarSharing</RouterLink>
+        <RouterLink class="navbar__logo" to="/cars">
+          <span class="navbar__logo-icon"></span>
+          CarSharing
+        </RouterLink>
         <nav class="navbar__nav">
           <RouterLink to="/cars">Автомобили</RouterLink>
           <RouterLink v-if="auth.isAuthenticated" to="/bookings">Мои бронирования</RouterLink>
@@ -29,7 +41,13 @@ async function handleLogout() {
         </nav>
         <div class="navbar__auth">
           <template v-if="auth.isAuthenticated">
-            <span class="navbar__user">{{ auth.user?.username }}</span>
+            <RouterLink to="/profile" class="navbar__profile-btn">
+              <div class="navbar__avatar">
+                <img v-if="profileStore.profile?.avatarUrl" :src="profileStore.profile.avatarUrl" alt="avatar" class="navbar__avatar-img" />
+                <span v-else>{{ auth.user?.username?.slice(0, 2).toUpperCase() }}</span>
+              </div>
+              <span class="navbar__user">{{ auth.user?.username }}</span>
+            </RouterLink>
             <button class="btn btn--ghost" @click="handleLogout">Выйти</button>
           </template>
           <template v-else>
@@ -71,11 +89,24 @@ async function handleLogout() {
   }
 
   &__logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 18px;
     font-weight: 700;
     color: #1f2937;
     text-decoration: none;
     white-space: nowrap;
+  }
+
+  &__logo-icon {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    background-color: #dc2626;
+    -webkit-mask: url('../images/logo.png') no-repeat center / contain;
+    mask: url('../images/logo.png') no-repeat center / contain;
   }
 
   &__nav {
@@ -121,8 +152,51 @@ async function handleLogout() {
     gap: 12px;
   }
 
+  &__profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    padding: 4px 10px 4px 4px;
+    border-radius: 9999px;
+    border: 1.5px solid #e5e7eb;
+    transition: border-color 0.15s, background 0.15s;
+
+    &:hover {
+      border-color: #2563eb;
+      background: #eff6ff;
+    }
+
+    &.router-link-active {
+      border-color: #2563eb;
+      background: #eff6ff;
+    }
+  }
+
+  &__avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  &__avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
   &__user {
-    font-size: 14px;
+    font-size: 13px;
     color: #374151;
     font-weight: 500;
   }

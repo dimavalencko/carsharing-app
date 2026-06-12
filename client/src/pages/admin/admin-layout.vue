@@ -19,7 +19,7 @@ async function handleLogout() {
   <div class="admin-wrap">
     <aside class="sidebar">
       <div class="sidebar__brand">
-        <span class="sidebar__brand-icon">🚗</span>
+        <span class="sidebar__brand-icon"></span>
         <div>
           <div class="sidebar__brand-name">CarSharing</div>
           <div class="sidebar__brand-sub">Панель администратора</div>
@@ -75,12 +75,6 @@ async function handleLogout() {
       </nav>
 
       <div class="sidebar__footer">
-        <RouterLink to="/cars" class="sidebar__back">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-          Вернуться на сайт
-        </RouterLink>
         <button class="sidebar__logout" @click="handleLogout">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -134,8 +128,13 @@ async function handleLogout() {
   }
 
   &__brand-icon {
-    font-size: 28px;
+    display: inline-block;
+    width: 32px;
+    height: 32px;
     flex-shrink: 0;
+    background-color: #dc2626;
+    -webkit-mask: url('../../app/images/logo.png') no-repeat center / contain;
+    mask: url('../../app/images/logo.png') no-repeat center / contain;
   }
 
   &__brand-name {
@@ -203,23 +202,6 @@ async function handleLogout() {
     display: flex;
     flex-direction: column;
     gap: 6px;
-  }
-
-  &__back {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border-radius: 6px;
-    color: rgba(255, 255, 255, 0.6);
-    text-decoration: none;
-    font-size: 13px;
-    transition: color 0.15s, background 0.15s;
-
-    &:hover {
-      color: #fff;
-      background: rgba(255, 255, 255, 0.08);
-    }
   }
 
   &__logout {

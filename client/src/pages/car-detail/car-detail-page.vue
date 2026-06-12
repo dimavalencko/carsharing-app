@@ -5,14 +5,16 @@ import AppLayout from '@/app/layouts/AppLayout.vue';
 import { useCarStore } from '@/entities/car/model/car.store';
 import { useBookingStore } from '@/entities/booking/model/booking.store';
 import { useAuthStore } from '@/entities/auth/model/auth.store';
+import { useProfileStore } from '@/entities/profile/model/profile.store';
 
 const route = useRoute();
 const router = useRouter();
 const carStore = useCarStore();
 const bookingStore = useBookingStore();
 const auth = useAuthStore();
+const profileStore = useProfileStore();
 
-const carId = route.params.id as string;
+const slug = String(route.params.slug ?? '');
 
 const today = new Date().toISOString().slice(0, 10);
 const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
@@ -34,8 +36,10 @@ const totalPrice = computed(() =>
   car.value ? car.value.pricePerDay * durationDays.value : 0
 );
 
+const hasLicense = computed(() => profileStore.license?.isExpired === false);
+
 const canBook = computed(() =>
-  car.value?.status === 'available' && auth.isAuthenticated
+  car.value?.status === 'available' && auth.isAuthenticated && hasLicense.value
 );
 
 const categoryLabel: Record<string, string> = {
@@ -51,10 +55,11 @@ const statusClass: Record<string, string> = {
 };
 
 async function book() {
+  if (!car.value) return;
   bookingError.value = '';
   try {
     await bookingStore.create({
-      carId,
+      carId: car.value.id,
       startDate: startDate.value,
       endDate: endDate.value,
     });
@@ -64,7 +69,12 @@ async function book() {
   }
 }
 
-onMounted(() => carStore.fetchById(carId));
+onMounted(async () => {
+  await carStore.fetchBySlug(slug);
+  if (auth.isAuthenticated && !profileStore.license && !profileStore.licenseLoading) {
+    profileStore.fetchLicense();
+  }
+});
 </script>
 
 <template>
@@ -103,6 +113,16 @@ onMounted(() => carStore.fetchById(carId));
             <div v-if="!auth.isAuthenticated" class="booking-form__hint">
               <RouterLink to="/login">Войдите</RouterLink>, чтобы забронировать автомобиль
             </div>
+            <template v-else-if="!hasLicense">
+              <div class="booking-form__no-license">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3v4M8 3v4M2 11h20"/>
+                  <circle cx="9" cy="16" r="2"/><path d="M13 16h4M13 14h2"/>
+                </svg>
+                <p>Для аренды автомобиля необходимо добавить <strong>водительское удостоверение</strong> в профиле</p>
+                <RouterLink to="/profile" class="booking-form__license-link">Добавить права →</RouterLink>
+              </div>
+            </template>
             <template v-else>
               <div class="form-field">
                 <label>Дата начала</label>
@@ -260,6 +280,40 @@ onMounted(() => carStore.fetchById(carId));
     margin: 0;
 
     a { color: #2563eb; }
+  }
+
+  &__no-license {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: 8px 0;
+
+    svg { stroke: #f59e0b; }
+
+    p {
+      font-size: 13px;
+      color: #6b7280;
+      margin: 0;
+      line-height: 1.5;
+      strong { color: #111827; }
+    }
+  }
+
+  &__license-link {
+    display: inline-block;
+    padding: 8px 18px;
+    background: #fffbeb;
+    border: 1.5px solid #fde68a;
+    border-radius: 8px;
+    color: #b45309;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s;
+
+    &:hover { background: #fef3c7; }
   }
 
   &__summary {

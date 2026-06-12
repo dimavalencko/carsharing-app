@@ -2,6 +2,7 @@ export const CarsEndpoints = {
   CARS: {
     GET_ALL: 'cars.cars.getAll',
     GET_BY_ID: 'cars.cars.getById',
+    GET_BY_SLUG: 'cars.cars.getBySlug',
     GET_AVAILABLE: 'cars.cars.getAvailable',
     CREATE: 'cars.cars.create',
     UPDATE: 'cars.cars.update',

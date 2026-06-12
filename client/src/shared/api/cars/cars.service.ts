@@ -23,6 +23,11 @@ export const carsService = {
     return data;
   },
 
+  async getBySlug(slug: string): Promise<Car> {
+    const { data } = await defaultHttpClient.get<Car>(`/cars/by-slug/${slug}`);
+    return data;
+  },
+
   async create(dto: CreateCarDto): Promise<Car> {
     const { data } = await defaultHttpClient.post<Car>('/cars', dto);
     return data;
