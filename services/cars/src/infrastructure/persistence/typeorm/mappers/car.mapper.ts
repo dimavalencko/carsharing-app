@@ -15,6 +15,7 @@ export class CarMapper {
     car.pricePerDay = Number(entity.pricePerDay);
     car.licensePlate = entity.licensePlate;
     car.city = entity.city;
+    car.slug = entity.slug;
     car.vin = entity.vin;
     car.color = entity.color;
     car.mileage = entity.mileage;
@@ -36,6 +37,7 @@ export class CarMapper {
     entity.pricePerDay = car.pricePerDay;
     entity.licensePlate = car.licensePlate;
     entity.city = car.city;
+    entity.slug = car.slug;
     entity.vin = car.vin;
     entity.color = car.color;
     entity.mileage = car.mileage;

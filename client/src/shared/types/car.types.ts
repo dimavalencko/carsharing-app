@@ -3,6 +3,7 @@ export type CarStatus = 'available' | 'rented' | 'reserved' | 'maintenance';
 
 export interface Car {
   id: string;
+  slug: string;
   brand: string;
   model: string;
   year: number;

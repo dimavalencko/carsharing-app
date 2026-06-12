@@ -1,6 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { AddDriverLicenseUseCase, GetDriverLicenseByUserIdUseCase, UpdateDriverLicenseUseCase, DeleteDriverLicenseUseCase, AddDriverLicenseDto, UpdateDriverLicenseDto } from '../use-cases/driver-license';
 import type { IDriverLicenseRepository, IUserRepository } from '@/domain/interfaces/repositories';
+import { DriverLicenseMapper, DriverLicenseResponseDto } from '../mappers';
 
 @Injectable()
 export class DriverLicenseService {
@@ -19,17 +20,22 @@ export class DriverLicenseService {
     this.deleteDriverLicenseUseCase = new DeleteDriverLicenseUseCase(this.driverLicenseRepository);
   }
 
-  async create(userId: string, dto: AddDriverLicenseDto) {
+  async create(userId: string, dto: AddDriverLicenseDto): Promise<DriverLicenseResponseDto> {
     const aggregate = await this.addDriverLicenseUseCase.execute(userId, dto);
-    return aggregate.getDriverLicense();
+    const license = aggregate.getDriverLicense();
+    if (!license) throw new Error('Failed to create driver license');
+    return DriverLicenseMapper.toResponseDto(license);
   }
 
-  async getByUserId(userId: string) {
-    return this.getDriverLicenseByUserIdUseCase.execute(userId);
+  async getByUserId(userId: string): Promise<DriverLicenseResponseDto | null> {
+    const license = await this.getDriverLicenseByUserIdUseCase.execute(userId);
+    if (!license) return null;
+    return DriverLicenseMapper.toResponseDto(license);
   }
 
-  async update(userId: string, dto: UpdateDriverLicenseDto) {
-    return this.updateDriverLicenseUseCase.execute(userId, dto);
+  async update(userId: string, dto: UpdateDriverLicenseDto): Promise<DriverLicenseResponseDto> {
+    const license = await this.updateDriverLicenseUseCase.execute(userId, dto);
+    return DriverLicenseMapper.toResponseDto(license);
   }
 
   async delete(userId: string) {

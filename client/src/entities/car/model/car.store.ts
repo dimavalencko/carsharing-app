@@ -45,6 +45,18 @@ export const useCarStore = defineStore('cars', () => {
     }
   }
 
+  async function fetchBySlug(slug: string) {
+    loading.value = true;
+    error.value = null;
+    try {
+      currentCar.value = await carsService.getBySlug(slug);
+    } catch (e: any) {
+      error.value = e.response?.data?.message || 'Автомобиль не найден';
+    } finally {
+      loading.value = false;
+    }
+  }
+
   async function createCar(dto: CreateCarDto): Promise<Car> {
     loading.value = true;
     error.value = null;
@@ -106,7 +118,7 @@ export const useCarStore = defineStore('cars', () => {
 
   return {
     cars, currentCar, loading, error,
-    fetchAll, fetchAvailable, fetchById,
+    fetchAll, fetchAvailable, fetchById, fetchBySlug,
     createCar, updateCar, updateCarStatus, deleteCar, clearError,
   };
 });

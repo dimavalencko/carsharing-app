@@ -42,7 +42,7 @@ export class UserEntity {
   @Column({ type: 'varchar', length: 100, nullable: true })
   city?: string;
 
-  @Column({ type: 'varchar', length: 500, nullable: true })
+  @Column({ type: 'text', nullable: true })
   avatarUrl?: string;
 
   @Column({ type: 'varchar', length: 20, default: 'User' })

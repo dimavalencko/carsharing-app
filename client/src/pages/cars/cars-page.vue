@@ -72,7 +72,7 @@ onMounted(async () => {
           v-for="car in filtered"
           :key="car.id"
           class="car-card"
-          @click="router.push({ name: 'car-detail', params: { id: car.id } })"
+          @click="router.push({ name: 'car-detail', params: { slug: car.slug } })"
         >
           <div class="car-card__img">
             <img v-if="car.imageUrl" :src="car.imageUrl" :alt="`${car.brand} ${car.model}`" class="car-card__photo" />

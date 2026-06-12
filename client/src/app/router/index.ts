@@ -27,13 +27,19 @@ const router = createRouter({
     },
     {
       name: 'car-detail',
-      path: '/cars/:id',
+      path: '/cars/:slug',
       component: () => import('@pages/car-detail/car-detail-page.vue'),
     },
     {
       name: 'bookings',
       path: '/bookings',
       component: () => import('@pages/bookings/bookings-page.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      name: 'profile',
+      path: '/profile',
+      component: () => import('@pages/profile/profile-page.vue'),
       meta: { requiresAuth: true },
     },
     {
@@ -75,6 +81,7 @@ router.beforeEach((to, _from, next) => {
   const auth = useAuthStore();
 
   const isAdminRoute = to.path.startsWith('/admin');
+  const isProfileRoute = to.path === '/profile';
   const isGuestRoute = !!to.meta.requiresGuest;
 
   if (!auth.isAuthenticated) {
@@ -85,7 +92,7 @@ router.beforeEach((to, _from, next) => {
   }
 
   if (auth.isAdmin) {
-    if (!isAdminRoute) {
+    if (!isAdminRoute && !isProfileRoute) {
       return next({ name: 'admin' });
     }
     return next();

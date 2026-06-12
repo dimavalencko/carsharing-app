@@ -34,6 +34,10 @@ export class CarsProxy {
     return this.send<CarResponseDto>(CarsEndpoints.CARS.GET_BY_ID, { id });
   }
 
+  async getBySlug(slug: string): Promise<CarResponseDto> {
+    return this.send<CarResponseDto>(CarsEndpoints.CARS.GET_BY_SLUG, { slug });
+  }
+
   async create(dto: CreateCarDto): Promise<CarResponseDto> {
     return this.send<CarResponseDto>(CarsEndpoints.CARS.CREATE, dto);
   }
