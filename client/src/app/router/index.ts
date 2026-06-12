@@ -27,7 +27,7 @@ const router = createRouter({
     },
     {
       name: 'car-detail',
-      path: '/cars/:id',
+      path: '/cars/:slug',
       component: () => import('@pages/car-detail/car-detail-page.vue'),
     },
     {
@@ -35,6 +35,39 @@ const router = createRouter({
       path: '/bookings',
       component: () => import('@pages/bookings/bookings-page.vue'),
       meta: { requiresAuth: true },
+    },
+    {
+      name: 'profile',
+      path: '/profile',
+      component: () => import('@pages/profile/profile-page.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/admin',
+      component: () => import('@pages/admin/admin-layout.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true },
+      children: [
+        {
+          path: '',
+          name: 'admin',
+          component: () => import('@pages/admin/dashboard/admin-dashboard-page.vue'),
+        },
+        {
+          path: 'cars',
+          name: 'admin-cars',
+          component: () => import('@pages/admin/cars/admin-cars-page.vue'),
+        },
+        {
+          path: 'bookings',
+          name: 'admin-bookings',
+          component: () => import('@pages/admin/bookings/admin-bookings-page.vue'),
+        },
+        {
+          path: 'users',
+          name: 'admin-users',
+          component: () => import('@pages/admin/users/admin-users-page.vue'),
+        },
+      ],
     },
     {
       name: 'not-found',
@@ -45,13 +78,31 @@ const router = createRouter({
 });
 
 router.beforeEach((to, _from, next) => {
-  const authStore = useAuthStore();
+  const auth = useAuthStore();
 
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return next({ name: 'login', query: { redirect: to.fullPath } });
+  const isAdminRoute = to.path.startsWith('/admin');
+  const isProfileRoute = to.path === '/profile';
+  const isGuestRoute = !!to.meta.requiresGuest;
+
+  if (!auth.isAuthenticated) {
+    if (to.meta.requiresAuth) {
+      return next({ name: 'login', query: { redirect: to.fullPath } });
+    }
+    return next();
   }
 
-  if (to.meta.requiresGuest && authStore.isAuthenticated) {
+  if (auth.isAdmin) {
+    if (!isAdminRoute && !isProfileRoute) {
+      return next({ name: 'admin' });
+    }
+    return next();
+  }
+
+  if (isAdminRoute) {
+    return next({ name: 'cars' });
+  }
+
+  if (isGuestRoute) {
     return next({ name: 'cars' });
   }
 

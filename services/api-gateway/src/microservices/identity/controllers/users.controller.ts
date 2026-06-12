@@ -18,6 +18,21 @@ import { UpdateUserDto } from '../dto/user/update-user.dto';
 export class UsersController {
   constructor(private readonly identityProxy: IdentityProxy) {}
 
+  @Get('profile')
+  async getMyProfile(@Request() req) {
+    return this.identityProxy.getProfile(
+      req.user.sub || req.user.id || req.user.userId,
+    );
+  }
+
+  @Get('by-email')
+  async getByEmail(@Query('email') email: string) {
+    if (!email) {
+      return { message: 'Email query parameter is required' };
+    }
+    return this.identityProxy.getUserByEmail(email);
+  }
+
   @Get()
   async getAll() {
     return this.identityProxy.getAllUsers();
@@ -26,21 +41,6 @@ export class UsersController {
   @Get(':id')
   async getUserById(@Param('id') id: string) {
     return this.identityProxy.getUserById(id);
-  }
-
-  @Get('by-email')
-  async getByEmail(@Query('email') email: string) {
-    if(!email) {
-      return { message: 'Email query parameter is required' };
-    }
-    return this.identityProxy.getUserByEmail(email);
-  }
-
-  @Get('profile')
-  async getMyProfile(@Request() req) {
-    return this.identityProxy.getProfile(
-      req.user.sub || req.user.id || req.user.userId,
-    );
   }
 
   @Put('profile')

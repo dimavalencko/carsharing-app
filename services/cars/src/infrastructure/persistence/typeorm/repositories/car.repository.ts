@@ -13,6 +13,11 @@ export class CarRepository implements ICarRepository {
     return entity ? CarMapper.toDomain(entity) : null;
   }
 
+  async findBySlug(slug: string): Promise<Car | null> {
+    const entity = await this.ormRepo.findOne({ where: { slug } });
+    return entity ? CarMapper.toDomain(entity) : null;
+  }
+
   async findAll(filters?: CarFilters): Promise<Car[]> {
     const where: Record<string, unknown> = {};
     if (filters?.category) where.category = filters.category;

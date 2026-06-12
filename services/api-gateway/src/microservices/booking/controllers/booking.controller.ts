@@ -10,7 +10,7 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { CreateBookingDto } from '@carsharing/common';
+import { CreateBookingRequestDto } from '../dto/create-booking-request.dto';
 import { AdminGuard, JwtAuthGuard } from '@src/guards';
 import { BookingProxy } from '../proxy/booking.proxy';
 
@@ -44,7 +44,7 @@ export class BookingController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() dto: CreateBookingDto, @Request() req) {
+  async create(@Body() dto: CreateBookingRequestDto, @Request() req) {
     const userId = req.user.sub || req.user.id || req.user.userId;
     return this.bookingProxy.create({ ...dto, userId });
   }

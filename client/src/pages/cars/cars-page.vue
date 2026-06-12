@@ -72,10 +72,11 @@ onMounted(async () => {
           v-for="car in filtered"
           :key="car.id"
           class="car-card"
-          @click="router.push({ name: 'car-detail', params: { id: car.id } })"
+          @click="router.push({ name: 'car-detail', params: { slug: car.slug } })"
         >
           <div class="car-card__img">
-            <span class="car-icon">🚗</span>
+            <img v-if="car.imageUrl" :src="car.imageUrl" :alt="`${car.brand} ${car.model}`" class="car-card__photo" />
+            <span v-else class="car-icon">🚗</span>
           </div>
           <div class="car-card__body">
             <div class="car-card__top">
@@ -172,6 +173,14 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+  }
+
+  &__photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   &__body {

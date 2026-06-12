@@ -11,6 +11,7 @@ export class CarResponseDto {
   pricePerDay: number;
   licensePlate: string;
   city: string;
+  slug?: string;
   vin?: string;
   color?: string;
   mileage?: number;
