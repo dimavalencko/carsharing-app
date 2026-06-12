@@ -39,6 +39,11 @@ export class CarsController {
     return this.carsProxy.getAvailable({ category, city });
   }
 
+  @Get('by-slug/:slug')
+  async getBySlug(@Param('slug') slug: string) {
+    return this.carsProxy.getBySlug(slug);
+  }
+
   @Get(':id')
   async getById(@Param('id') id: string) {
     return this.carsProxy.getById(id);

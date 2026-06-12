@@ -136,52 +136,68 @@ export class SeederService implements OnModuleInit {
 
   private async seedDriverLicensesForSomeUsers(): Promise<void> {
     const users = await this.userRepository.findAll();
-    const regularUsers = users.slice(1);
+    const regularUsers = users
+      .filter((u) => u.getUser().getRole() !== 'Admin')
+      .slice(0, 3);
 
     if (regularUsers.length === 0) {
       this.logger.log('No regular users found for driver licenses seeding.');
       return;
     }
 
-    this.logger.log('Seeding driver licenses for some users...');
+    this.logger.log('Seeding driver licenses for first 3 users...');
+
+    const birthDates = [
+      new Date(1990, 4, 15),
+      new Date(1993, 8, 22),
+      new Date(1988, 1, 7),
+    ];
+
+    const issuedBys = [
+      'МРЭО ГИБДД №1 г. Москва',
+      'МРЭО ГИБДД №3 г. Санкт-Петербург',
+      'МРЭО ГИБДД №2 г. Казань',
+    ];
 
     for (let i = 0; i < regularUsers.length; i++) {
-      if (i % 2 === 0) {
-        const aggregate = regularUsers[i];
-        if (aggregate.getDriverLicense()) {
-          continue;
-        }
-
-        const user = aggregate.getUser();
-        const licenseId = uuidv4();
-
-        const driverLicense = DriverLicense.create(
-          {
-            userId: user.getId(),
-            firstName: user.getFirstName(),
-            lastName: user.getLastName() || 'Unknown',
-            middleName: user.getMiddleName(),
-            birthDate: new Date(1995, 0, 1),
-            birthPlace: 'Unknown City',
-            issueDate: new Date(),
-            expiryDate: new Date(
-              new Date().setFullYear(new Date().getFullYear() + 10),
-            ),
-            issuedBy: 'GIBDD Test',
-            licenseNumber: DriverLicenseNumberValue.create(
-              `DL-${Math.floor(Math.random() * 100000)}`,
-            ),
-          },
-          licenseId,
-        );
-
-        aggregate.addDriverLicense(driverLicense);
-        await this.userRepository.save(aggregate);
-
+      const aggregate = regularUsers[i];
+      if (aggregate.getDriverLicense()) {
         this.logger.log(
-          `✔ Added driver license to user ${user.getLogin().getValue()}`,
+          `User ${aggregate.getUser().getLogin().getValue()} already has a driver license. Skipping.`,
         );
+        continue;
       }
+
+      const user = aggregate.getUser();
+      const licenseId = uuidv4();
+      const issueDate = new Date(2018 + i, 2 + i, 10 + i);
+      const expiryDate = new Date(issueDate);
+      expiryDate.setFullYear(expiryDate.getFullYear() + 10);
+
+      const driverLicense = DriverLicense.create(
+        {
+          userId: user.getId(),
+          firstName: user.getFirstName(),
+          lastName: user.getLastName() || 'Тестов',
+          middleName: user.getMiddleName(),
+          birthDate: birthDates[i],
+          birthPlace: ['Москва', 'Санкт-Петербург', 'Казань'][i],
+          issueDate,
+          expiryDate,
+          issuedBy: issuedBys[i],
+          licenseNumber: DriverLicenseNumberValue.create(
+            `77 ${String(10 + i * 7).padStart(2, '0')} ${String(100000 + i * 12345).slice(0, 6)}`,
+          ),
+        },
+        licenseId,
+      );
+
+      aggregate.addDriverLicense(driverLicense);
+      await this.userRepository.save(aggregate);
+
+      this.logger.log(
+        `✔ Added driver license to user ${user.getLogin().getValue()}`,
+      );
     }
   }
 }

@@ -4,12 +4,17 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AllExceptionsFilter } from './filters/http-exception.filter';
 import cookieParser from 'cookie-parser';
+import * as express from 'express';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
-  const app = await NestFactory.create(AppModule);
+
+  const app = await NestFactory.create(AppModule, { bodyParser: false });
   const configService = app.get(ConfigService);
 
+  const BODY_LIMIT = '5mb';
+  app.use(express.json({ limit: BODY_LIMIT }));
+  app.use(express.urlencoded({ limit: BODY_LIMIT, extended: true }));
   app.use(cookieParser());
 
   app.enableCors({
@@ -19,7 +24,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, 
+      whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
       transformOptions: {

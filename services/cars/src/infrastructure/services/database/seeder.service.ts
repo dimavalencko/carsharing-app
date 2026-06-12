@@ -23,11 +23,29 @@ export class CarsSeederService implements OnModuleInit {
     const count = await repo.count();
     if (count > 0) {
       this.logger.log(`Cars table already has ${count} rows — skipping seed.`);
+      await this.backfillSlugs(repo);
       return;
     }
 
     this.logger.log(`Seeding ${CARS_SEED_DATA.length} cars...`);
     await repo.insert(CARS_SEED_DATA);
     this.logger.log(`✅ Seeded ${CARS_SEED_DATA.length} cars.`);
+  }
+
+  private async backfillSlugs(repo: any): Promise<void> {
+    const missing = await repo
+      .createQueryBuilder('car')
+      .where('car.slug IS NULL')
+      .getMany();
+    if (missing.length === 0) return;
+
+    this.logger.log(`Backfilling slugs for ${missing.length} cars...`);
+    for (const car of missing) {
+      const seed = CARS_SEED_DATA.find(s => s.id === car.id);
+      if (seed?.slug) {
+        await repo.update(car.id, { slug: seed.slug });
+      }
+    }
+    this.logger.log(`✅ Slugs backfilled.`);
   }
 }

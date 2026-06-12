@@ -47,6 +47,8 @@ export class AuthFacadeService {
     });
     return {
       userId: user.getId(),
+      username: user.getLogin().getValue(),
+      role: user.getRole(),
       accessToken: tokens.accessToken.getValue(),
       refreshToken: tokens.refreshToken.getValue(),
     };
@@ -70,6 +72,9 @@ export class AuthFacadeService {
     });
 
     return {
+      userId: entity.getId(),
+      username: entity.getLogin().getValue(),
+      role: entity.getRole(),
       accessToken: tokens.accessToken.getValue(),
       refreshToken: tokens.refreshToken.getValue(),
     };

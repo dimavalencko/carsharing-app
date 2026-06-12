@@ -3,6 +3,7 @@ export type CarStatus = 'available' | 'rented' | 'reserved' | 'maintenance';
 
 export interface Car {
   id: string;
+  slug: string;
   brand: string;
   model: string;
   year: number;
@@ -28,6 +29,22 @@ export interface CreateCarDto {
   pricePerDay: number;
   licensePlate: string;
   city: string;
+  vin?: string;
+  color?: string;
+  mileage?: number;
+  imageUrl?: string;
+  description?: string;
+}
+
+export interface UpdateCarDto {
+  brand?: string;
+  model?: string;
+  year?: number;
+  category?: CarCategory;
+  status?: CarStatus;
+  pricePerDay?: number;
+  licensePlate?: string;
+  city?: string;
   vin?: string;
   color?: string;
   mileage?: number;

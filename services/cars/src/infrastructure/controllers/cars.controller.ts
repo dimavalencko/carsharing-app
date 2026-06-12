@@ -41,6 +41,16 @@ export class CarsController {
     }
   }
 
+  @MessagePattern(CarsEndpoints.CARS.GET_BY_SLUG)
+  async getBySlug(@Payload() data: { slug: string }) {
+    try {
+      return await this.carsService.getBySlug(data.slug);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      return { error: message, statusCode: 404 };
+    }
+  }
+
   @MessagePattern(CarsEndpoints.CARS.CREATE)
   async create(@Payload() data: CreateCarDto) {
     try {

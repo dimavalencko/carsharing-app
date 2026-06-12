@@ -10,6 +10,7 @@ export interface CarFilters {
 
 export interface ICarRepository {
   findById(id: string): Promise<Car | null>;
+  findBySlug(slug: string): Promise<Car | null>;
   findAll(filters?: CarFilters): Promise<Car[]>;
   findAvailable(filters?: Omit<CarFilters, 'status'>): Promise<Car[]>;
   save(car: Car): Promise<Car>;
