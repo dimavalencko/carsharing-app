@@ -6,7 +6,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - PORT=3000
       - IDENTITY_HOST=identity
       - IDENTITY_PORT=3001
@@ -33,14 +33,14 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - SERVICE_PORT=3001
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=${DB_USER:-postgres}
       - DB_PASSWORD=${DB_PASSWORD:-root}
       - DB_NAME=identity
-      - AUTO_SEED=false
+      - AUTO_SEED=true
     depends_on:
       postgres:
         condition: service_healthy
@@ -53,7 +53,7 @@ services:
     ports:
       - "3002:3002"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - SERVICE_PORT=3002
       - DB_HOST=postgres
       - DB_PORT=5432
@@ -62,7 +62,7 @@ services:
       - DB_NAME=booking
       - CARS_SERVICE_HOST=cars
       - CARS_SERVICE_PORT=3003
-      - AUTO_SEED=false
+      - AUTO_SEED=true
     depends_on:
       postgres:
         condition: service_healthy
@@ -75,14 +75,14 @@ services:
     ports:
       - "3003:3003"
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - SERVICE_PORT=3003
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USERNAME=${DB_USER:-postgres}
       - DB_PASSWORD=${DB_PASSWORD:-root}
       - DB_NAME=cars
-      - AUTO_SEED=false
+      - AUTO_SEED=true
     depends_on:
       postgres:
         condition: service_healthy

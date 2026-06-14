@@ -13,7 +13,8 @@ export const useCarStore = defineStore('cars', () => {
     loading.value = true;
     error.value = null;
     try {
-      cars.value = await carsService.getAll(filters);
+      const result = await carsService.getAll(filters);
+      cars.value = Array.isArray(result) ? result : [];
     } catch (e: any) {
       error.value = e.response?.data?.message || 'Ошибка загрузки автомобилей';
     } finally {
@@ -25,7 +26,8 @@ export const useCarStore = defineStore('cars', () => {
     loading.value = true;
     error.value = null;
     try {
-      cars.value = await carsService.getAvailable(filters);
+      const result = await carsService.getAvailable(filters);
+      cars.value = Array.isArray(result) ? result : [];
     } catch (e: any) {
       error.value = e.response?.data?.message || 'Ошибка загрузки автомобилей';
     } finally {
