@@ -188,7 +188,7 @@ onMounted(async () => {
   &__img {
     background: linear-gradient(135deg, #dbeafe, #ede9fe);
     border-radius: 12px;
-    height: 280px;
+    height: 400px;
     display: flex;
     align-items: center;
     justify-content: center;
