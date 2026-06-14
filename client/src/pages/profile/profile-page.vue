@@ -91,9 +91,6 @@ const avatarGradient = computed(() => {
   return gradients[code];
 });
 
-const roleLabel = computed(() => auth.isAdmin ? 'Администратор' : 'Пользователь');
-const roleClass = computed(() => auth.isAdmin ? 'badge--admin' : 'badge--user');
-
 const licenseStatusLabel = computed(() => {
   if (!license.value) return null;
   if (license.value.isExpired) return { text: 'Просрочено', cls: 'status--expired' };
