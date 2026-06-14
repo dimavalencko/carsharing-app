@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    image: ghcr.io/dimavalencko/carsharing-app-api-gateway:${IMAGE_TAG:-latest}
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - IDENTITY_HOST=identity
+      - IDENTITY_PORT=3001
+      - CARS_SERVICE_HOST=cars
+      - CARS_SERVICE_PORT=3003
+      - BOOKING_SERVICE_HOST=booking
+      - BOOKING_SERVICE_PORT=3002
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost}
+    depends_on:
+      - identity
+      - cars
+      - booking
+    networks:
+      - carsharing-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  identity:
+    image: ghcr.io/dimavalencko/carsharing-app-identity:${IMAGE_TAG:-latest}
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_PORT=3001
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - DB_NAME=identity
+      - AUTO_SEED=false
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - carsharing-net
+    restart: unless-stopped
+
+  booking:
+    image: ghcr.io/dimavalencko/carsharing-app-booking:${IMAGE_TAG:-latest}
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_PORT=3002
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - DB_NAME=booking
+      - CARS_SERVICE_HOST=cars
+      - CARS_SERVICE_PORT=3003
+      - AUTO_SEED=false
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - carsharing-net
+    restart: unless-stopped
+
+  cars:
+    image: ghcr.io/dimavalencko/carsharing-app-cars:${IMAGE_TAG:-latest}
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+      - SERVICE_PORT=3003
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
+      - DB_NAME=cars
+      - AUTO_SEED=false
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - carsharing-net
+    restart: unless-stopped
+
+  client:
+    image: ghcr.io/dimavalencko/carsharing-app-client:${IMAGE_TAG:-latest}
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - carsharing-net
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-root}
+      - POSTGRES_DB=identity
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - carsharing-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+networks:
+  carsharing-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
