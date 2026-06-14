@@ -127,6 +127,6 @@ jobs:
             cd /opt/carsharing
             echo "${{ secrets.GHCR_READ_TOKEN }}" | docker login ghcr.io -u dimavalencko --password-stdin
             docker compose -f docker-compose.prod.yaml pull
-            docker compose -f docker-compose.prod.yaml up -d
+            docker compose -f docker-compose.prod.yaml up -d --force-recreate
             docker image prune -f
             echo "✅ Deploy completed"
