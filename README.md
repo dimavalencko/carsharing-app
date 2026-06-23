@@ -80,3 +80,5 @@ docker compose -f docker-compose.prod.yaml up -d
 ## Прод
 
 Приложение развёрнуто на VDS: [http://161.104.32.15](http://161.104.32.15)
+Админка: admin / admin123
+ЛК: user1 / password1
