@@ -111,4 +111,4 @@ import { PasswordHasherService } from '@/infrastructure/services/password-hasher
     DataSource,
   ],
 })
-export class DatabaseModule {}
+export class DatabaseModule { }

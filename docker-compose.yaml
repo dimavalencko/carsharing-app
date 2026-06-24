@@ -115,6 +115,18 @@ services:
       timeout: 10s
       retries: 5
 
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - carsharing-net
+    restart: unless-stopped
+
 networks:
   carsharing-net:
     driver: bridge
