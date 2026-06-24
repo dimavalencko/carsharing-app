@@ -40,7 +40,7 @@ services:
       - DB_USERNAME=${DB_USERNAME:-postgres}
       - DB_PASSWORD=${DB_PASSWORD:-postgres}
       - DB_NAME=identity
-      - AUTO_SEED=${AUTO_SEED:-false}
+      - AUTO_SEED=true
     depends_on:
       postgres:
         condition: service_healthy
@@ -62,7 +62,7 @@ services:
       - DB_NAME=booking
       - CARS_SERVICE_HOST=cars
       - CARS_SERVICE_PORT=3003
-      - AUTO_SEED=${AUTO_SEED:-false}
+      - AUTO_SEED=true
     depends_on:
       postgres:
         condition: service_healthy
@@ -82,7 +82,7 @@ services:
       - DB_USERNAME=${DB_USERNAME:-postgres}
       - DB_PASSWORD=${DB_PASSWORD:-postgres}
       - DB_NAME=cars
-      - AUTO_SEED=${AUTO_SEED:-false}
+      - AUTO_SEED=true
     depends_on:
       postgres:
         condition: service_healthy
