@@ -146,28 +146,43 @@ jobs:
             # Pull latest images
             docker compose -f docker-compose.prod.yaml pull
 
-            # Start fresh with new network (but same database volume)
-            docker compose -f docker-compose.prod.yaml up -d
+            # Start postgres FIRST and wait for it to be fully ready
+            echo "Starting database..."
+            docker compose -f docker-compose.prod.yaml up -d postgres
 
-            # Wait for postgres to be healthy first
+            # Wait for postgres to accept connections
             echo "Waiting for database to be ready..."
-            for i in {1..30}; do
-              if docker exec carsharing-postgres-1 pg_isready -U postgres &>/dev/null; then
-                echo "✓ Database is ready"
+            for i in {1..60}; do
+              if docker exec carsharing-postgres-1 pg_isready -U postgres > /dev/null 2>&1; then
+                echo "✓ Database is accepting connections"
                 break
               fi
-              echo "Waiting... ($i/30)"
-              sleep 2
+              if [ $i -eq 60 ]; then
+                echo "❌ Database failed to start"
+                docker compose -f docker-compose.prod.yaml logs postgres | tail -30
+                exit 1
+              fi
+              echo "Waiting for database... ($i/60)"
+              sleep 1
             done
 
+            # Wait for postgres to fully initialize (run init.sql)
+            echo "Waiting for database initialization..."
+            sleep 3
+
+            # Now start all other services
+            echo "Starting application services..."
+            docker compose -f docker-compose.prod.yaml up -d
+
             # Wait for services to stabilize
-            sleep 10
+            echo "Waiting for services to stabilize..."
+            sleep 15
 
             # Health check
             echo "Checking container health..."
             if docker compose -f docker-compose.prod.yaml ps | grep -E "Exited"; then
               echo "❌ Some containers failed to start"
-              docker compose -f docker-compose.prod.yaml logs --tail=100
+              docker compose -f docker-compose.prod.yaml logs --tail=50
               exit 1
             fi
 
