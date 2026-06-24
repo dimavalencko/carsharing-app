@@ -22,8 +22,9 @@ export class CarsSeederService implements OnModuleInit {
     const repo = this.dataSource.getRepository(CarEntity);
     const count = await repo.count();
     if (count > 0) {
-      this.logger.log(`Cars table already has ${count} rows — skipping seed.`);
+      this.logger.log(`Cars table already has ${count} rows — updating seed data...`);
       await this.backfillSlugs(repo);
+      await this.backfillImages(repo);
       return;
     }
 
@@ -47,5 +48,20 @@ export class CarsSeederService implements OnModuleInit {
       }
     }
     this.logger.log(`✅ Slugs backfilled.`);
+  }
+
+  private async backfillImages(repo: any): Promise<void> {
+    const cars = await repo.find();
+    let updated = 0;
+    for (const car of cars) {
+      const seed = CARS_SEED_DATA.find(s => s.id === car.id);
+      if (seed?.imageUrl && seed.imageUrl !== car.imageUrl) {
+        await repo.update(car.id, { imageUrl: seed.imageUrl });
+        updated++;
+      }
+    }
+    if (updated > 0) {
+      this.logger.log(`✅ Updated imageUrl for ${updated} cars.`);
+    }
   }
 }
