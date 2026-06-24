@@ -46,8 +46,7 @@ services:
       - DB_NAME=identity
       - AUTO_SEED=true
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     networks:
       - carsharing-net
     restart: unless-stopped
@@ -70,8 +69,7 @@ services:
       - CARS_SERVICE_PORT=3003
       - AUTO_SEED=true
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     networks:
       - carsharing-net
     restart: unless-stopped
@@ -92,8 +90,7 @@ services:
       - DB_NAME=cars
       - AUTO_SEED=true
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     networks:
       - carsharing-net
     restart: unless-stopped
@@ -105,7 +102,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
     ports:
-      - "5433:5432"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
