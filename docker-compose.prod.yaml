@@ -37,8 +37,8 @@ services:
       - SERVICE_PORT=3001
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
       - DB_NAME=identity
       - AUTO_SEED=true
     depends_on:
@@ -57,8 +57,8 @@ services:
       - SERVICE_PORT=3002
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_USERNAME=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
       - DB_NAME=booking
       - CARS_SERVICE_HOST=cars
       - CARS_SERVICE_PORT=3003
@@ -79,8 +79,8 @@ services:
       - SERVICE_PORT=3003
       - DB_HOST=postgres
       - DB_PORT=5432
-      - DB_USERNAME=${DB_USERNAME:-postgres}
-      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_USERNAME=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-root}
       - DB_NAME=cars
       - AUTO_SEED=true
     depends_on:
@@ -103,9 +103,9 @@ services:
   postgres:
     image: postgres:17-alpine
     environment:
-      - POSTGRES_USER=${DB_USERNAME:-postgres}
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-postgres}
-      - POSTGRES_DB=postgres
+      - POSTGRES_USER=${DB_USER:-postgres}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-root}
+      - POSTGRES_DB=identity
     ports:
       - "5432:5432"
     volumes:
