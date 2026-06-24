@@ -39,12 +39,6 @@ import { PasswordHasherService } from '@/infrastructure/services/password-hasher
           logging: config.get('DB_LOGGING') === 'true',
           migrations: ['dist/migrations/*.js'],
           migrationsRun: isProd,
-          extra: {
-            max: 20,
-            idleTimeoutMillis: 30000,
-            connectionTimeoutMillis: 2000,
-            statement_timeout: 30000,
-          },
         };
       },
       inject: [ConfigService],

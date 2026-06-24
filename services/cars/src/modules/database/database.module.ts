@@ -21,12 +21,6 @@ import { CarsSeederService } from '@/infrastructure/services/database/seeder.ser
         entities: [CarEntity],
         synchronize: config.get('NODE_ENV') !== 'production',
         logging: config.get('DB_LOGGING') === 'true',
-        extra: {
-          max: 20,
-          idleTimeoutMillis: 30000,
-          connectionTimeoutMillis: 2000,
-          statement_timeout: 30000,
-        },
       }),
       inject: [ConfigService],
     },
