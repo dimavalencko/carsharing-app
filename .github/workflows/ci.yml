@@ -140,18 +140,28 @@ jobs:
 
             echo "${{ secrets.GHCR_READ_TOKEN }}" | docker login ghcr.io -u dimavalencko --password-stdin
 
-            # Stop old containers and clean up
+            # Stop old containers and clean up (keep volumes with data)
             docker compose -f docker-compose.prod.yaml down --remove-orphans
 
             # Pull latest images
             docker compose -f docker-compose.prod.yaml pull
 
-            # Start fresh with new network
+            # Start fresh with new network (but same database volume)
             docker compose -f docker-compose.prod.yaml up -d
 
-            # Wait for services to be healthy
-            echo "Waiting for services to start..."
-            sleep 15
+            # Wait for postgres to be healthy first
+            echo "Waiting for database to be ready..."
+            for i in {1..30}; do
+              if docker exec carsharing-postgres-1 pg_isready -U postgres &>/dev/null; then
+                echo "✓ Database is ready"
+                break
+              fi
+              echo "Waiting... ($i/30)"
+              sleep 2
+            done
+
+            # Wait for services to stabilize
+            sleep 10
 
             # Health check
             echo "Checking container health..."
@@ -161,6 +171,6 @@ jobs:
               exit 1
             fi
 
-            # Verify all services are healthy or up
+            # Verify all services are up
             docker compose -f docker-compose.prod.yaml ps
-            echo "✅ Deploy completed successfully"
+            echo "✅ Deploy completed successfully with preserved data"
