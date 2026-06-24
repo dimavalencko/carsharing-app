@@ -125,8 +125,29 @@ jobs:
           key: ${{ secrets.VDS_SSH_KEY }}
           script: |
             cd /opt/carsharing
+
+            # Create .env if not exists
+            if [ ! -f .env ]; then
+              cat > .env << 'ENVEOF'
+            DB_USERNAME=postgres
+            DB_PASSWORD=postgres
+            DB_HOST=postgres
+            DB_PORT=5432
+            IMAGE_TAG=latest
+            ENVEOF
+            fi
+
             echo "${{ secrets.GHCR_READ_TOKEN }}" | docker login ghcr.io -u dimavalencko --password-stdin
             docker compose -f docker-compose.prod.yaml pull
             docker compose -f docker-compose.prod.yaml up -d --force-recreate
+
+            # Health check
+            sleep 10
+            if docker compose -f docker-compose.prod.yaml ps | grep -E "Exited|unhealthy"; then
+              echo "❌ Some containers failed"
+              docker compose -f docker-compose.prod.yaml logs --tail=50
+              exit 1
+            fi
+
             docker image prune -f
-            echo "✅ Deploy completed"
+            echo "✅ Deploy completed successfully"
